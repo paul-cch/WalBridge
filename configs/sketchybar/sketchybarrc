@@ -1,0 +1,185 @@
+#!/bin/bash
+
+CONFIG_DIR="$HOME/.config/sketchybar"
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+ITEM_DIR="$CONFIG_DIR/items"
+
+source "$CONFIG_DIR/colors.sh"
+
+##### Bar Appearance #####
+# Transparent bar - items have their own boxes
+sketchybar --bar \
+  position=top \
+  height=36 \
+  margin=0 \
+  y_offset=2 \
+  corner_radius=0 \
+  blur_radius=0 \
+  color=$TRANSPARENT \
+  shadow=off \
+  sticky=on \
+  topmost=window
+
+##### Defaults #####
+default=(
+  padding_left=4
+  padding_right=4
+  icon.font="JetBrainsMono Nerd Font:Medium:14.0"
+  label.font="JetBrainsMono Nerd Font:Medium:13.0"
+  icon.color=$WHITE
+  label.color=$WHITE
+  icon.padding_left=6
+  icon.padding_right=6
+  icon.y_offset=1
+  label.padding_left=4
+  label.padding_right=8
+  background.color=$BAR_COLOR
+  background.corner_radius=6
+  background.height=28
+  background.border_color=$GREY
+  background.border_width=1
+)
+sketchybar --default "${default[@]}"
+
+##### Named Spaces #####
+# Phosphor Icons (UTF-8 literals)
+SPACE_ICONS=("" "" "" "")
+SPACE_LABELS=("Code" "Web" "Chat" "Notes")
+
+for i in "${!SPACE_ICONS[@]}"; do
+  sid="$(($i + 1))"
+  space=(
+    space="$sid"
+    icon="${SPACE_ICONS[i]}"
+    icon.padding_left=8
+    icon.padding_right=8
+    icon.font="Phosphor:Regular:16.0"
+    label="${SPACE_LABELS[i]}"
+    label.font="JetBrainsMono Nerd Font:Medium:12.0"
+    label.drawing=off
+    label.padding_left=0
+    label.padding_right=8
+    background.drawing=on
+    background.color=$BAR_COLOR
+    background.border_color=$GREY
+    background.border_width=1
+    script="$PLUGIN_DIR/space.sh"
+    click_script="/opt/homebrew/bin/yabai -m space --focus $sid"
+  )
+  sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}"
+done
+
+# Separator
+sketchybar --add item separator left \
+  --set separator \
+  icon="│" \
+  icon.color=$GREY \
+  icon.font="JetBrainsMono Nerd Font:Medium:14.0" \
+  icon.padding_left=4 \
+  icon.padding_right=4 \
+  label.drawing=off \
+  background.drawing=off
+
+##### Front App #####
+sketchybar --add item front_app left \
+  --set front_app \
+  icon.font="sketchybar-app-font:Regular:14.0" \
+  icon.y_offset=0 \
+  label.font="JetBrainsMono Nerd Font:Medium:13.0" \
+  script="$PLUGIN_DIR/front_app.sh" \
+  click_script="osascript -e 'tell application \"System Events\" to set visible of first process whose frontmost is true to false'" \
+  --subscribe front_app front_app_switched
+
+# Live Activity (iPhone sync)
+sketchybar --add item live_activity left \
+  --set live_activity \
+  icon.drawing=off \
+  label.font="JetBrainsMono Nerd Font:Medium:12.0" \
+  label.padding_left=8 \
+  label.padding_right=8 \
+  background.color=0xff3a3a3c \
+  update_freq=30 \
+  drawing=off \
+  script="$PLUGIN_DIR/live_activity.sh"
+
+##### Right Side Items #####
+
+# Clock
+sketchybar --add item clock right \
+  --set clock \
+  icon.drawing=off \
+  label.font="JetBrainsMono Nerd Font:Medium:13.0" \
+  label.padding_left=10 \
+  label.padding_right=10 \
+  update_freq=30 \
+  script="$PLUGIN_DIR/clock.sh"
+
+# Battery
+sketchybar --add item battery right \
+  --set battery \
+  icon.font="JetBrainsMono Nerd Font:Medium:16.0" \
+  label.drawing=off \
+  update_freq=120 \
+  script="$PLUGIN_DIR/battery.sh" \
+  click_script="open 'x-apple.systempreferences:com.apple.preference.battery'" \
+  --subscribe battery system_woke power_source_change
+
+# AirPods Battery
+sketchybar --add item airpods right \
+  --set airpods \
+  icon.font="JetBrainsMono Nerd Font:Medium:14.0" \
+  icon=󰥰 \
+  label.font="JetBrainsMono Nerd Font:Medium:13.0" \
+  update_freq=60 \
+  script="$PLUGIN_DIR/airpods.sh" \
+  click_script="open 'x-apple.systempreferences:com.apple.preference.bluetooth'"
+
+# Volume
+sketchybar --add item volume right \
+  --set volume \
+  icon.font="JetBrainsMono Nerd Font:Medium:15.0" \
+  icon=󰕾 \
+  label.drawing=off \
+  script="$PLUGIN_DIR/volume.sh" \
+  click_script="osascript -e 'set volume output muted not (output muted of (get volume settings))'" \
+  --subscribe volume volume_change
+
+# WiFi
+sketchybar --add item wifi right \
+  --set wifi \
+  icon.font="JetBrainsMono Nerd Font:Medium:16.0" \
+  icon=󰖩 \
+  label.drawing=off \
+  update_freq=30 \
+  script="$PLUGIN_DIR/wifi.sh" \
+  click_script="open 'x-apple.systempreferences:com.apple.preference.network'"
+
+# IRIS Server Status
+sketchybar --add item iris right \
+  --set iris \
+  icon.font="JetBrainsMono Nerd Font:Medium:12.0" \
+  icon=● \
+  label.drawing=off \
+  update_freq=30 \
+  script="$PLUGIN_DIR/iris.sh"
+
+# Twingate
+sketchybar --add item twingate right \
+  --set twingate \
+  icon.font="JetBrainsMono Nerd Font:Medium:15.0" \
+  icon=󰒒 \
+  label.drawing=off \
+  update_freq=30 \
+  script="$PLUGIN_DIR/twingate.sh" \
+  click_script="open -a 'Twingate'"
+
+# Supercharge
+sketchybar --add item supercharge right \
+  --set supercharge \
+  icon.font="JetBrainsMono Nerd Font:Medium:15.0" \
+  icon=󱐋 \
+  label.drawing=off \
+  click_script="open -a 'Supercharge'"
+
+##### Finalize #####
+sketchybar --update
