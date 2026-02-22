@@ -1,0 +1,47 @@
+# Wallpaper Color Sync Configuration
+# Copy to: ~/.config/wallpaper-colors/config.toml
+#
+# All values shown are defaults — only override what you want to change.
+
+[general]
+# Display to extract wallpaper from (1 = primary, 2 = secondary, etc.)
+display = 1
+
+# Number of dominant colors to extract via median-cut quantization
+n_colors = 8
+
+[scheme]
+# Minimum saturation for accent color selection (0.0–1.0)
+min_saturation = 0.45
+
+# Minimum brightness for accent color selection (0.0–1.0)
+min_value = 0.55
+
+# How much named colors shift toward the accent hue (0.0 = none, 1.0 = fully)
+harmonize_factor = 0.25
+
+# Manual accent override — set to a hex color to skip auto-detection.
+# Useful when you always want a specific tint regardless of wallpaper.
+# accent_override = "#3a7bd5"
+
+[borders]
+# Border accent minimum saturation (0.0–1.0)
+vivify_sat = 0.45
+
+# Border accent minimum brightness (0.0–1.0)
+vivify_val = 0.65
+
+# Border opacity (0–255, where 255 = fully opaque)
+opacity = 179  # 0xB3
+
+[targets]
+# Enable/disable individual target apps.
+# Set to false to skip writing + reloading that target.
+sketchybar = true
+borders = true
+kitty = true
+neovim = true
+yazi = true
+starship = true
+opencode = true
+hydrotodo = true
