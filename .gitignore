@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ruff_cache/
+.vscode/
+.playwright/
+.nvmrc
+stata-mcp-folder/
+mcp_servers.json
+*.log
+*.err.log
