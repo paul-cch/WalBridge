@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *wallpaper-faded[^.]* | *wallpaper-fade[^-d.]* | *borders-animated[^.]*) echo 'BLOCK: Edit the .swift source instead of the compiled binary' >&2; exit 2;; esac"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE\" in */tools/wallpaper-faded.swift) cd /Users/paulcouach/Projects/wallpaper-theme-sync/tools && swiftc -O wallpaper-faded.swift -o wallpaper-faded -framework AppKit -framework QuartzCore 2>&1;; */tools/wallpaper-fade.swift) cd /Users/paulcouach/Projects/wallpaper-theme-sync/tools && swiftc -O wallpaper-fade.swift -o wallpaper-fade -framework AppKit -framework QuartzCore -framework ScreenCaptureKit 2>&1;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}
