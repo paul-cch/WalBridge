@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.paulcouach.wallpaper-faded</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/paulcouach/.local/bin/WallpaperFaded.app/Contents/MacOS/wallpaper-faded</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>StandardOutPath</key>
+	<string>/Users/paulcouach/.config/wallpaper-colors/faded.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/paulcouach/.config/wallpaper-colors/faded.log</string>
+</dict>
+</plist>
