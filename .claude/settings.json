@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "case \"$CLAUDE_FILE\" in */tools/wallpaper-faded.swift) cd /Users/paulcouach/Projects/wallpaper-theme-sync/tools && swiftc -O wallpaper-faded.swift -o wallpaper-faded -framework AppKit -framework QuartzCore 2>&1;; */tools/wallpaper-fade.swift) cd /Users/paulcouach/Projects/wallpaper-theme-sync/tools && swiftc -O wallpaper-fade.swift -o wallpaper-fade -framework AppKit -framework QuartzCore -framework ScreenCaptureKit 2>&1;; esac"
+            "command": "DIR=$(dirname \"$CLAUDE_FILE\"); case \"$CLAUDE_FILE\" in */tools/wallpaper-faded.swift) cd \"$DIR\" && swiftc -O wallpaper-faded.swift -o wallpaper-faded -framework AppKit -framework QuartzCore 2>&1;; */tools/wallpaper-fade.swift) cd \"$DIR\" && swiftc -O wallpaper-fade.swift -o wallpaper-fade -framework AppKit -framework QuartzCore -framework ScreenCaptureKit 2>&1;; esac"
           }
         ]
       }

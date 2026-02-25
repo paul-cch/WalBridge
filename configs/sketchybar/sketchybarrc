@@ -1,4 +1,6 @@
 #!/bin/bash
+# Example SketchyBar config — customize to your setup.
+# Some items below are personal (IRIS, Twingate, etc.) and included as examples.
 
 CONFIG_DIR="$HOME/.config/sketchybar"
 PLUGIN_DIR="$CONFIG_DIR/plugins"
