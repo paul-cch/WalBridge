@@ -2,6 +2,8 @@
 
 Automatically syncs SketchyBar, JankyBorders, Kitty, WezTerm, Alacritty, Ghostty, iTerm2, tmux, btop, Neovim, Yazi, Starship, OpenCode, and HydroToDo colors to match the current macOS wallpaper — with animated transitions between wallpapers (fade, slide, wipe, grow), theme-aware wallpaper cycling, and multi-monitor support.
 
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 ## How it works
 
 ```
@@ -51,7 +53,7 @@ Automatically syncs SketchyBar, JankyBorders, Kitty, WezTerm, Alacritty, Ghostty
 3. **Scheme**: Picks accent (most vibrant — or manual override via config), dark/light backgrounds, a gradient secondary (most hue-distant palette color), and generates named colors at fixed hues matching the accent's saturation/brightness.
 4. **Vivify**: Border colors use the same hues but with configurable saturation/value floors so they pop on screen.
 5. **Write**: Regenerates all config files for every enabled target app.
-6. **Reload**: SketchyBar (`--reload`), JankyBorders (IPC via homebrew `borders`), Kitty (`kitten @ set-colors`), Neovim (`--remote-send` to all instances). WezTerm, Alacritty, Ghostty, iTerm2, tmux, btop, Yazi, Starship, OpenCode, and HydroToDo apply on next app reload/launch/prompt.
+6. **Reload**: SketchyBar (`--reload`), JankyBorders (IPC via homebrew `borders`), Kitty (`kitten @ set-colors`), Neovim (`--remote-send` to all instances), and tmux (`source-file` when a server is running). WezTerm, Alacritty, Ghostty, iTerm2, btop, Yazi, Starship, OpenCode, and HydroToDo apply on next app reload/launch/prompt.
 7. **Dedup**: Caches a perceptual hash (sha256 of 16x16 thumbnail) so unchanged wallpapers are skipped in ~370ms.
 
 ### Wallpaper transitions
@@ -70,6 +72,9 @@ The `wallpaper-faded` daemon keeps a persistent overlay window on top of the des
 ```bash
 # Standard install/update
 bash install.sh
+
+# Optional: one-time setup for tmux/btop/iTerm2 integration
+bash install.sh --setup-targets
 
 # Optional: install prebuilt borders-animated binary (checksum verified)
 bash install.sh --install-prebuilt-borders
@@ -240,8 +245,8 @@ active_color=gradient(top_left=0xffCOLOR1,bottom_right=0xffCOLOR2)
 | **WezTerm** | `~/.config/wezterm/colors/wallpaper.toml` | Applied on next WezTerm config reload |
 | **Alacritty** | `~/.config/alacritty/themes/wallpaper.toml` | Applied on next Alacritty config reload |
 | **Ghostty** | `~/.config/ghostty/themes/wallpaper.conf` | Applied on next Ghostty config reload/restart |
-| **iTerm2** | `~/.config/iterm2/colors/wallpaper.itermcolors` | Import preset in iTerm2 (`Profiles > Colors > Color Presets`) |
-| **tmux** | `~/.config/tmux/themes/wallpaper.conf` | Applied after `source-file ~/.config/tmux/themes/wallpaper.conf` |
+| **iTerm2** | `~/.config/iterm2/colors/wallpaper.itermcolors` | One-time preset import (`Settings > Profiles > Colors > Color Presets`) |
+| **tmux** | `~/.config/tmux/themes/wallpaper.conf` | Hot-reloaded automatically if tmux server is running |
 | **btop** | `~/.config/btop/themes/wallpaper.theme` | Applied when `color_theme = "wallpaper"` is set in `btop.conf` |
 | **Neovim** | `~/.config/wallpaper-colors/nvim_colors.lua` + lualine theme | `nvim --remote-send` to all instances |
 | **Yazi** | `~/.config/yazi/flavors/wallpaper.yazi/flavor.toml` | Applied on next yazi launch |
@@ -261,6 +266,23 @@ SKETCHYBAR_ENABLE_TWINGATE=1 \
 SKETCHYBAR_ENABLE_SUPERCHARGE=1 \
 ~/.config/sketchybar/sketchybarrc
 ```
+
+### One-time target wiring
+
+To wire tmux and btop automatically and set up iTerm2 import guidance:
+
+```bash
+# If already installed
+bash ~/.config/wallpaper-colors/setup-targets.sh
+
+# Or run during install
+bash install.sh --setup-targets
+```
+
+This helper:
+- Adds `source-file ~/.config/tmux/themes/wallpaper.conf` to `~/.tmux.conf` (if missing)
+- Sets `color_theme = "wallpaper"` in `~/.config/btop/btop.conf`
+- Prints iTerm2 preset import path (`~/.config/iterm2/colors/wallpaper.itermcolors`)
 
 ### Terminal/Borders/Yazi/iTerm2/tmux/btop theming overrides
 
@@ -371,6 +393,7 @@ wallpaper-theme-sync/
 │   │   ├── config.py            # Config loading
 │   │   ├── writers/             # Per-app config writers
 │   │   └── reloaders.py         # Service reload functions
+│   ├── setup-targets.sh         # One-time target integration helper
 │   ├── wallpaper_cycle.sh       # Theme-aware wallpaper cycler
 │   └── borders-cycle.sh         # Borders startup with fixed gradient
 ├── launchd/
@@ -395,6 +418,7 @@ wallpaper-theme-sync/
 │   ├── writers/
 │   └── reloaders.py
 ├── config.toml                  # User config (optional)
+├── setup-targets.sh             # One-time target integration helper
 ├── wallpaper_cycle.sh           # Deployed cycle script
 ├── borders-cycle.sh             # Borders startup
 ├── nvim_colors.lua              # Auto-generated Neovim highlights
@@ -505,9 +529,9 @@ For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTH
 - **WezTerm** (optional) — set `color_scheme = "wallpaper"` in your WezTerm config
 - **Alacritty** (optional) — import generated `wallpaper.toml` in `alacritty.toml`
 - **Ghostty** (optional) — set `theme = wallpaper.conf` in Ghostty config
-- **iTerm2** (optional) — import generated `wallpaper.itermcolors` preset
-- **tmux** (optional) — `source-file ~/.config/tmux/themes/wallpaper.conf` from your `~/.tmux.conf`
-- **btop** (optional) — set `color_theme = "wallpaper"` in `~/.config/btop/btop.conf`
+- **iTerm2** (optional) — import generated `wallpaper.itermcolors` preset once
+- **tmux** (optional) — run `bash ~/.config/wallpaper-colors/setup-targets.sh` once
+- **btop** (optional) — run `bash ~/.config/wallpaper-colors/setup-targets.sh` once
 - **Neovim** with `wallpaper-sync.lua` config
 - **Yazi** — flavor applied on launch; theme selector is auto-managed unless custom `theme.toml` is detected
 - **Xcode Command Line Tools** (for `swiftc`)

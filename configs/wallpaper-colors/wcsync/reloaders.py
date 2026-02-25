@@ -78,6 +78,28 @@ def reload_nvim():
     return procs
 
 
+def reload_tmux():
+    """Hot-reload tmux theme include when a tmux server is running."""
+    from .writers.tmux import output_path
+
+    tmux_bin = _find_bin("tmux")
+    has_session = subprocess.run(
+        [tmux_bin, "list-sessions"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    if has_session.returncode != 0:
+        return []
+
+    return [
+        subprocess.Popen(
+            [tmux_bin, "source-file", output_path()],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    ]
+
+
 def reload_borders(scheme, config=None):
     """Push new gradient to running borders-animated via IPC. Returns Popen.
 
@@ -120,6 +142,8 @@ def reload_all(scheme, config=None):
         reloaders.append(("kitty", lambda: reload_kitty()))
     if targets.get("neovim", True):
         reloaders.append(("neovim", lambda: reload_nvim()))
+    if targets.get("tmux", True):
+        reloaders.append(("tmux", lambda: reload_tmux()))
     if targets.get("borders", True):
         reloaders.append(("borders", lambda s=scheme, c=config: [reload_borders(s, c)]))
 
@@ -130,8 +154,8 @@ def reload_all(scheme, config=None):
             log(f"Skipping {name} reload: {e}")
 
     # Yazi, Starship, OpenCode, HydroTodo, WezTerm, Alacritty, Ghostty,
-    # iTerm2, tmux, btop — no direct hot-reload here; applied on next
-    # launch/reload/prompt.
+    # iTerm2, btop — no direct hot-reload here; applied on next
+    # launch/reload/prompt. tmux is hot-reloaded when a server exists.
     for p in procs:
         try:
             p.wait(timeout=5)

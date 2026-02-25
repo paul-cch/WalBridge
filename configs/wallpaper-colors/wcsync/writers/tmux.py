@@ -11,6 +11,10 @@ def _output_path():
     return os.path.expanduser(os.environ.get("WALLPAPER_TMUX_OUTPUT_PATH", DEFAULT_OUTPUT_PATH))
 
 
+def output_path():
+    return _output_path()
+
+
 def write(scheme, config=None):
     dark = hex6(*scheme["dark"])
     light = hex6(*scheme["light"])

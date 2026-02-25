@@ -6,6 +6,7 @@ set -euo pipefail
 #   bash install.sh                         # Install / update
 #   bash install.sh --uninstall             # Remove launchd agents
 #   bash install.sh --install-prebuilt-borders  # Install checked-in borders-animated binary
+#   bash install.sh --setup-targets         # Also wire tmux/btop/iTerm2 target setup
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR="$HOME/.config/wallpaper-colors"
@@ -15,6 +16,7 @@ CHECKSUM_DIR="$REPO_DIR/checksums"
 AGENT_PREFIX="${WTS_AGENT_PREFIX:-com.wallpaper-theme-sync}"
 INSTALL_PREBUILT_BORDERS=false
 UNINSTALL=false
+SETUP_TARGETS=false
 
 info()  { printf '→ %s\n' "$*"; }
 error() { printf 'ERROR: %s\n' "$*" >&2; }
@@ -22,11 +24,12 @@ error() { printf 'ERROR: %s\n' "$*" >&2; }
 usage() {
     cat <<'USAGE'
 Usage:
-  bash install.sh [--install-prebuilt-borders]
+  bash install.sh [--install-prebuilt-borders] [--setup-targets]
   bash install.sh --uninstall
 
 Options:
   --install-prebuilt-borders  Install checked-in borders-animated after checksum validation
+  --setup-targets              Run one-time tmux/btop/iTerm2 setup helper
   --uninstall                 Unload and remove launchd agents for current prefix
 
 Environment:
@@ -42,6 +45,9 @@ parse_args() {
                 ;;
             --install-prebuilt-borders)
                 INSTALL_PREBUILT_BORDERS=true
+                ;;
+            --setup-targets)
+                SETUP_TARGETS=true
                 ;;
             -h|--help)
                 usage
@@ -141,7 +147,7 @@ deploy_configs() {
     cp "$REPO_DIR/configs/wallpaper-colors/wallpaper_colors.py" "$CONFIG_DIR/"
     cp -r "$REPO_DIR/configs/wallpaper-colors/wcsync" "$CONFIG_DIR/"
 
-    for script in wallpaper_cycle.sh borders-cycle.sh theme_watcher.sh next-wallpaper.sh; do
+    for script in wallpaper_cycle.sh borders-cycle.sh theme_watcher.sh next-wallpaper.sh setup-targets.sh; do
         [ -f "$REPO_DIR/configs/wallpaper-colors/$script" ] && \
             cp "$REPO_DIR/configs/wallpaper-colors/$script" "$CONFIG_DIR/"
     done
@@ -231,6 +237,23 @@ load_agents() {
 }
 
 # ---------------------------------------------------------------------------
+# Optional target setup helper
+# ---------------------------------------------------------------------------
+setup_targets() {
+    if [ "$SETUP_TARGETS" != true ]; then
+        return
+    fi
+
+    if [ ! -f "$CONFIG_DIR/setup-targets.sh" ]; then
+        error "Target setup helper not found: $CONFIG_DIR/setup-targets.sh"
+        return
+    fi
+
+    info "Running optional target setup (tmux/btop/iTerm2)"
+    bash "$CONFIG_DIR/setup-targets.sh"
+}
+
+# ---------------------------------------------------------------------------
 # Uninstall
 # ---------------------------------------------------------------------------
 uninstall() {
@@ -265,9 +288,11 @@ deploy_configs
 build_tools
 install_agents
 load_agents
+setup_targets
 
 echo ""
 echo "Done!"
 echo "  Config: $CONFIG_DIR/config.toml"
 echo "  Test:   python3 $CONFIG_DIR/wallpaper_colors.py -v"
+echo "  Targets setup (optional): bash install.sh --setup-targets"
 echo "  Logs:   tail -f $CONFIG_DIR/sync.log"
