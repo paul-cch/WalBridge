@@ -101,14 +101,21 @@ def reload_all(scheme, config=None):
     targets = config.targets
     procs = []
 
+    reloaders = []
     if targets.get("sketchybar", True):
-        procs.append(reload_sketchybar())
+        reloaders.append(("sketchybar", lambda: [reload_sketchybar()]))
     if targets.get("kitty", True):
-        procs.extend(reload_kitty())
+        reloaders.append(("kitty", lambda: reload_kitty()))
     if targets.get("neovim", True):
-        procs.extend(reload_nvim())
+        reloaders.append(("neovim", lambda: reload_nvim()))
     if targets.get("borders", True):
-        procs.append(reload_borders(scheme, config))
+        reloaders.append(("borders", lambda s=scheme, c=config: [reload_borders(s, c)]))
+
+    for name, fn in reloaders:
+        try:
+            procs.extend(fn())
+        except FileNotFoundError as e:
+            log(f"Skipping {name} reload: {e}")
 
     # Yazi, Starship, OpenCode, HydroTodo — no hot-reload; applied on next launch/prompt
     for p in procs:

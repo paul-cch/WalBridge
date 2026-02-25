@@ -29,9 +29,7 @@ def get_wallpaper_path(display=1):
     Returns:
         File path string or empty string on failure.
     """
-    cmd = [DESKTOPPR]
-    if display > 1:
-        cmd.append(str(display))
+    cmd = [DESKTOPPR, str(display - 1)]  # desktoppr uses 0-based screen index
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
