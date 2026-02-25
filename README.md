@@ -238,6 +238,21 @@ SKETCHYBAR_ENABLE_SUPERCHARGE=1 \
 ~/.config/sketchybar/sketchybarrc
 ```
 
+### Borders/Yazi theming overrides
+
+Defaults are still plug-and-play, but you can customize paths/names when integrating into a different dotfiles layout:
+
+```bash
+# Borders writer + borders-cycle.sh
+export WALLPAPER_BORDER_COLORS_FILE="$HOME/.config/wallpaper-colors/border_colors"
+export WALLPAPER_BORDERS_BIN="$HOME/.local/bin/borders-animated"
+
+# Yazi writer
+export WALLPAPER_YAZI_FLAVOR_NAME="wallpaper"
+# Optional explicit path (overrides flavor name derivation):
+# export WALLPAPER_YAZI_OUTPUT_PATH="$HOME/.config/yazi/flavors/wallpaper.yazi/flavor.toml"
+```
+
 ### Neovim details
 
 Generates a Lua module with highlight groups for syntax, UI, diagnostics, and git. Syntax colors are vivified (brightness boosted) so they stay readable on dark/transparent backgrounds. Reloaded three ways:

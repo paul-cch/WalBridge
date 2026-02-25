@@ -4,7 +4,13 @@ import os
 
 from ..utils import atomic_write, hex6
 
-OUTPUT_PATH = os.path.expanduser("~/.config/yazi/flavors/wallpaper.yazi/flavor.toml")
+DEFAULT_FLAVOR_NAME = "wallpaper"
+
+
+def _output_path():
+    flavor_name = os.environ.get("WALLPAPER_YAZI_FLAVOR_NAME", DEFAULT_FLAVOR_NAME)
+    default_path = f"~/.config/yazi/flavors/{flavor_name}.yazi/flavor.toml"
+    return os.path.expanduser(os.environ.get("WALLPAPER_YAZI_OUTPUT_PATH", default_path))
 
 
 def write(scheme, config=None):
@@ -165,4 +171,4 @@ rules = [
 ]
 # : }}}}
 """
-    atomic_write(OUTPUT_PATH, content)
+    atomic_write(_output_path(), content)

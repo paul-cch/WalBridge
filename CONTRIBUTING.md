@@ -142,3 +142,12 @@ refactor: modularize wallpaper_colors.py into wcsync package
 - Private/personal widgets are opt-in (`SKETCHYBAR_ENABLE_IRIS=1`, etc.)
 - Missing private dependencies should not break the default profile
 - New plugin references must include matching scripts under `configs/sketchybar/plugins/`
+
+## Target Path Overrides
+
+To support different local layouts, these environment variables are supported:
+
+- `WALLPAPER_BORDER_COLORS_FILE` (used by borders writer + `borders-cycle.sh`)
+- `WALLPAPER_BORDERS_BIN` (used by `borders-cycle.sh`)
+- `WALLPAPER_YAZI_FLAVOR_NAME` (changes default Yazi flavor folder name)
+- `WALLPAPER_YAZI_OUTPUT_PATH` (explicit Yazi flavor output path)
