@@ -2,6 +2,8 @@
 
 Automatically syncs SketchyBar, JankyBorders, Kitty, WezTerm, Alacritty, Ghostty, iTerm2, tmux, btop, Neovim, Yazi, Starship, OpenCode, and HydroToDo colors to match the current macOS wallpaper — with animated transitions between wallpapers (fade, slide, wipe, grow), theme-aware wallpaper cycling, and multi-monitor support.
 
+Inspired by Linux theme engines and ricing workflows, this project brings similar desktop theming automation to macOS.
+
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## How it works
