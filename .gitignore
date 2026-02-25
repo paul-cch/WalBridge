@@ -8,3 +8,11 @@ stata-mcp-folder/
 mcp_servers.json
 *.log
 *.err.log
+
+# Compiled binaries (build from source via install.sh)
+borders-animated
+tools/wallpaper-faded
+tools/wallpaper-fade
+
+# Claude Code local settings
+.claude/settings.local.json
