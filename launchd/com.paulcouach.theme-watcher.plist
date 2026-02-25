@@ -7,15 +7,15 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
-		<string>/Users/paulcouach/.config/wallpaper-colors/theme_watcher.sh</string>
+		<string>__HOME__/.config/wallpaper-colors/theme_watcher.sh</string>
 	</array>
 	<key>KeepAlive</key>
 	<true/>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardOutPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/theme_watcher.log</string>
+	<string>__HOME__/.config/wallpaper-colors/theme_watcher.log</string>
 	<key>StandardErrorPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/theme_watcher.log</string>
+	<string>__HOME__/.config/wallpaper-colors/theme_watcher.log</string>
 </dict>
 </plist>

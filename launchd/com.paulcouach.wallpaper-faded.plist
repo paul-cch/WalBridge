@@ -6,15 +6,15 @@
 	<string>com.paulcouach.wallpaper-faded</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/paulcouach/.local/bin/WallpaperFaded.app/Contents/MacOS/wallpaper-faded</string>
+		<string>__HOME__/.local/bin/WallpaperFaded.app/Contents/MacOS/wallpaper-faded</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>KeepAlive</key>
 	<true/>
 	<key>StandardOutPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/faded.log</string>
+	<string>__HOME__/.config/wallpaper-colors/faded.log</string>
 	<key>StandardErrorPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/faded.log</string>
+	<string>__HOME__/.config/wallpaper-colors/faded.log</string>
 </dict>
 </plist>

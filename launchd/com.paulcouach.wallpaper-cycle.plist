@@ -7,15 +7,15 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
-		<string>/Users/paulcouach/.config/wallpaper-colors/wallpaper_cycle.sh</string>
+		<string>__HOME__/.config/wallpaper-colors/wallpaper_cycle.sh</string>
 	</array>
 	<key>StartInterval</key>
 	<integer>600</integer>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardOutPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/cycle.log</string>
+	<string>__HOME__/.config/wallpaper-colors/cycle.log</string>
 	<key>StandardErrorPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/cycle.log</string>
+	<string>__HOME__/.config/wallpaper-colors/cycle.log</string>
 </dict>
 </plist>

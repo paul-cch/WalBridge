@@ -6,8 +6,8 @@
 	<string>com.paulcouach.wallpaper-colors</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Library/Frameworks/Python.framework/Versions/3.13/bin/python3</string>
-		<string>/Users/paulcouach/.config/wallpaper-colors/wallpaper_colors.py</string>
+		<string>__PYTHON__</string>
+		<string>__HOME__/.config/wallpaper-colors/wallpaper_colors.py</string>
 	</array>
 	<key>EnvironmentVariables</key>
 	<dict>
@@ -16,16 +16,16 @@
 	</dict>
 	<key>WatchPaths</key>
 	<array>
-		<string>/Users/paulcouach/Library/Application Support/com.apple.wallpaper/Store</string>
+		<string>__HOME__/Library/Application Support/com.apple.wallpaper/Store</string>
 	</array>
 	<key>StartInterval</key>
 	<integer>120</integer>
 	<key>RunAtLoad</key>
 	<false/>
 	<key>StandardOutPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/sync.log</string>
+	<string>__HOME__/.config/wallpaper-colors/sync.log</string>
 	<key>StandardErrorPath</key>
-	<string>/Users/paulcouach/.config/wallpaper-colors/sync.err.log</string>
+	<string>__HOME__/.config/wallpaper-colors/sync.err.log</string>
 	<key>ThrottleInterval</key>
 	<integer>2</integer>
 </dict>

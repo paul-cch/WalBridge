@@ -26,13 +26,13 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
-		<string>/Users/paulcouach/.config/wallpaper-colors/borders-cycle.sh</string>
+		<string>__HOME__/.config/wallpaper-colors/borders-cycle.sh</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardErrorPath</key>
-	<string>/Users/paulcouach/.local/share/borders/borders.err.log</string>
+	<string>__HOME__/.local/share/borders/borders.err.log</string>
 	<key>StandardOutPath</key>
-	<string>/Users/paulcouach/.local/share/borders/borders.out.log</string>
+	<string>__HOME__/.local/share/borders/borders.out.log</string>
 </dict>
 </plist>
