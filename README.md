@@ -254,19 +254,6 @@ active_color=gradient(top_left=0xffCOLOR1,bottom_right=0xffCOLOR2)
 | **OpenCode** | `~/.config/opencode/themes/wallpaper.json` | Applied on next launch |
 | **HydroToDo** | `~/.config/wallpaper-colors/hydrotodo_colors.json` | Hot-reload via file watch |
 
-### SketchyBar optional widgets
-
-The example `configs/sketchybar/sketchybarrc` keeps private/personal integrations disabled by default. Enable them only if you use those tools:
-
-```bash
-SKETCHYBAR_ENABLE_LIVE_ACTIVITY=1 \
-SKETCHYBAR_ENABLE_AIRPODS=1 \
-SKETCHYBAR_ENABLE_IRIS=1 \
-SKETCHYBAR_ENABLE_TWINGATE=1 \
-SKETCHYBAR_ENABLE_SUPERCHARGE=1 \
-~/.config/sketchybar/sketchybarrc
-```
-
 ### One-time target wiring
 
 To wire tmux and btop automatically and set up iTerm2 import guidance:

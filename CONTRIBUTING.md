@@ -141,8 +141,7 @@ For user-visible behavior changes, update `CHANGELOG.md` in the same PR.
 
 `configs/sketchybar/sketchybarrc` is intentionally public-safe by default:
 
-- Private/personal widgets are opt-in (`SKETCHYBAR_ENABLE_IRIS=1`, etc.)
-- Missing private dependencies should not break the default profile
+- Keep the example profile generic and dependency-light
 - New plugin references must include matching scripts under `configs/sketchybar/plugins/`
 
 ## Target Path Overrides

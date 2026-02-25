@@ -1,18 +1,10 @@
 #!/bin/bash
 # Example SketchyBar config — customize to your setup.
 # Public defaults are provided for all referenced plugins.
-# Private integrations (IRIS, Twingate, etc.) are disabled by default in plugin stubs.
 
 CONFIG_DIR="$HOME/.config/sketchybar"
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 ITEM_DIR="$CONFIG_DIR/items"
-
-# Optional integrations (disabled by default for public portability).
-ENABLE_LIVE_ACTIVITY="${SKETCHYBAR_ENABLE_LIVE_ACTIVITY:-0}"
-ENABLE_AIRPODS="${SKETCHYBAR_ENABLE_AIRPODS:-0}"
-ENABLE_IRIS="${SKETCHYBAR_ENABLE_IRIS:-0}"
-ENABLE_TWINGATE="${SKETCHYBAR_ENABLE_TWINGATE:-0}"
-ENABLE_SUPERCHARGE="${SKETCHYBAR_ENABLE_SUPERCHARGE:-0}"
 
 source "$CONFIG_DIR/colors.sh"
 
@@ -100,20 +92,6 @@ sketchybar --add item front_app left \
   click_script="osascript -e 'tell application \"System Events\" to set visible of first process whose frontmost is true to false'" \
   --subscribe front_app front_app_switched
 
-# Live Activity (iPhone sync, optional)
-if [[ "$ENABLE_LIVE_ACTIVITY" = "1" ]]; then
-  sketchybar --add item live_activity left \
-    --set live_activity \
-    icon.drawing=off \
-    label.font="JetBrainsMono Nerd Font:Medium:12.0" \
-    label.padding_left=8 \
-    label.padding_right=8 \
-    background.color=0xff3a3a3c \
-    update_freq=30 \
-    drawing=off \
-    script="$PLUGIN_DIR/live_activity.sh"
-fi
-
 ##### Right Side Items #####
 
 # Clock
@@ -136,18 +114,6 @@ sketchybar --add item battery right \
   click_script="open 'x-apple.systempreferences:com.apple.preference.battery'" \
   --subscribe battery system_woke power_source_change
 
-# AirPods Battery (optional)
-if [[ "$ENABLE_AIRPODS" = "1" ]]; then
-  sketchybar --add item airpods right \
-    --set airpods \
-    icon.font="JetBrainsMono Nerd Font:Medium:14.0" \
-    icon=󰥰 \
-    label.font="JetBrainsMono Nerd Font:Medium:13.0" \
-    update_freq=60 \
-    script="$PLUGIN_DIR/airpods.sh" \
-    click_script="open 'x-apple.systempreferences:com.apple.preference.bluetooth'"
-fi
-
 # Volume
 sketchybar --add item volume right \
   --set volume \
@@ -167,39 +133,6 @@ sketchybar --add item wifi right \
   update_freq=30 \
   script="$PLUGIN_DIR/wifi.sh" \
   click_script="open 'x-apple.systempreferences:com.apple.preference.network'"
-
-# IRIS Server Status (optional/private)
-if [[ "$ENABLE_IRIS" = "1" ]]; then
-  sketchybar --add item iris right \
-    --set iris \
-    icon.font="JetBrainsMono Nerd Font:Medium:12.0" \
-    icon=● \
-    label.drawing=off \
-    update_freq=30 \
-    script="$PLUGIN_DIR/iris.sh"
-fi
-
-# Twingate (optional/private)
-if [[ "$ENABLE_TWINGATE" = "1" ]]; then
-  sketchybar --add item twingate right \
-    --set twingate \
-    icon.font="JetBrainsMono Nerd Font:Medium:15.0" \
-    icon=󰒒 \
-    label.drawing=off \
-    update_freq=30 \
-    script="$PLUGIN_DIR/twingate.sh" \
-    click_script="open -a 'Twingate'"
-fi
-
-# Supercharge (optional/private)
-if [[ "$ENABLE_SUPERCHARGE" = "1" ]]; then
-  sketchybar --add item supercharge right \
-    --set supercharge \
-    icon.font="JetBrainsMono Nerd Font:Medium:15.0" \
-    icon=󱐋 \
-    label.drawing=off \
-    click_script="open -a 'Supercharge'"
-fi
 
 ##### Finalize #####
 sketchybar --update

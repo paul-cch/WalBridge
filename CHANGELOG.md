@@ -17,7 +17,6 @@ All notable changes to this project are documented in this file.
 - `tmux` target now hot-reloads automatically when a tmux server is running.
 - Installer supports `--setup-targets` for one-time `tmux`/`btop`/`iTerm2` wiring.
 - Launchd templates and install flow are now prefix-configurable for public reuse.
-- Optional/private SketchyBar widgets are opt-in by environment flags.
 
 ### Security
 - Prebuilt `borders-animated` install is opt-in and checksum-verified.
