@@ -3,16 +3,95 @@ set -euo pipefail
 # install.sh — Deploy wallpaper-theme-sync to your Mac.
 #
 # Usage:
-#   bash install.sh              # Install / update
-#   bash install.sh --uninstall  # Remove launchd agents
+#   bash install.sh                         # Install / update
+#   bash install.sh --uninstall             # Remove launchd agents
+#   bash install.sh --install-prebuilt-borders  # Install checked-in borders-animated binary
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR="$HOME/.config/wallpaper-colors"
 BIN_DIR="$HOME/.local/bin"
 LAUNCH_DIR="$HOME/Library/LaunchAgents"
+CHECKSUM_DIR="$REPO_DIR/checksums"
+AGENT_PREFIX="${WTS_AGENT_PREFIX:-com.wallpaper-theme-sync}"
+INSTALL_PREBUILT_BORDERS=false
+UNINSTALL=false
 
 info()  { printf '→ %s\n' "$*"; }
 error() { printf 'ERROR: %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'USAGE'
+Usage:
+  bash install.sh [--install-prebuilt-borders]
+  bash install.sh --uninstall
+
+Options:
+  --install-prebuilt-borders  Install checked-in borders-animated after checksum validation
+  --uninstall                 Unload and remove launchd agents for current prefix
+
+Environment:
+  WTS_AGENT_PREFIX            launchd label/file prefix (default: com.wallpaper-theme-sync)
+USAGE
+}
+
+parse_args() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --uninstall)
+                UNINSTALL=true
+                ;;
+            --install-prebuilt-borders)
+                INSTALL_PREBUILT_BORDERS=true
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                error "Unknown option: $1"
+                usage
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+validate_agent_prefix() {
+    if ! printf '%s' "$AGENT_PREFIX" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9.-]*$'; then
+        error "Invalid WTS_AGENT_PREFIX: $AGENT_PREFIX"
+        error "Allowed pattern: ^[A-Za-z0-9][A-Za-z0-9.-]*$"
+        exit 1
+    fi
+}
+
+plist_dest_path() {
+    local source_name="$1"
+    echo "$LAUNCH_DIR/$AGENT_PREFIX.$source_name"
+}
+
+verify_sha256() {
+    local file="$1"
+    local checksum_file="$2"
+    local expected actual
+
+    if [ ! -f "$checksum_file" ]; then
+        error "Checksum file missing: $checksum_file"
+        return 1
+    fi
+
+    expected=$(awk '{print $1}' "$checksum_file")
+    actual=$(shasum -a 256 "$file" | awk '{print $1}')
+
+    if [ "$expected" != "$actual" ]; then
+        error "Checksum mismatch for $(basename "$file")"
+        error "Expected: $expected"
+        error "Actual:   $actual"
+        return 1
+    fi
+
+    return 0
+}
 
 # ---------------------------------------------------------------------------
 # Dependency check
@@ -101,17 +180,23 @@ build_tools() {
 PLIST
     done
 
-    # Copy borders-animated if present in repo
+    # Copy borders-animated only when explicitly requested.
     if [ -f "$REPO_DIR/borders-animated" ]; then
-        cp "$REPO_DIR/borders-animated" "$BIN_DIR/"
-        info "  Installed borders-animated"
+        if [ "$INSTALL_PREBUILT_BORDERS" = true ]; then
+            local checksum_file="$CHECKSUM_DIR/borders-animated.sha256"
+            verify_sha256 "$REPO_DIR/borders-animated" "$checksum_file"
+            cp "$REPO_DIR/borders-animated" "$BIN_DIR/"
+            info "  Installed borders-animated (checksum verified)"
+        else
+            info "  Skipped prebuilt borders-animated (pass --install-prebuilt-borders to install it)"
+        fi
     else
         info "  borders-animated not found in repo — build from source or download separately"
     fi
 }
 
 # ---------------------------------------------------------------------------
-# Install launchd agents (substitute __HOME__ and __PYTHON__ placeholders)
+# Install launchd agents (substitute __HOME__, __PYTHON__, __AGENT_PREFIX__)
 # ---------------------------------------------------------------------------
 install_agents() {
     local PYTHON
@@ -120,10 +205,15 @@ install_agents() {
 
     mkdir -p "$LAUNCH_DIR"
     for plist in "$REPO_DIR"/launchd/*.plist; do
-        local name
+        local name dest
         name=$(basename "$plist")
-        sed -e "s|__HOME__|$HOME|g" -e "s|__PYTHON__|$PYTHON|g" "$plist" > "$LAUNCH_DIR/$name"
-        info "  $name"
+        dest=$(plist_dest_path "$name")
+        sed \
+            -e "s|__HOME__|$HOME|g" \
+            -e "s|__PYTHON__|$PYTHON|g" \
+            -e "s|__AGENT_PREFIX__|$AGENT_PREFIX|g" \
+            "$plist" > "$dest"
+        info "  $(basename "$dest")"
     done
 }
 
@@ -132,7 +222,7 @@ install_agents() {
 # ---------------------------------------------------------------------------
 load_agents() {
     info "Loading launchd agents"
-    for plist in "$LAUNCH_DIR"/com.paulcouach.*.plist; do
+    for plist in "$LAUNCH_DIR"/"$AGENT_PREFIX".*.plist; do
         [ -f "$plist" ] || continue
         launchctl unload "$plist" 2>/dev/null || true
         launchctl load "$plist"
@@ -144,8 +234,8 @@ load_agents() {
 # Uninstall
 # ---------------------------------------------------------------------------
 uninstall() {
-    info "Uninstalling launchd agents"
-    for plist in "$LAUNCH_DIR"/com.paulcouach.*.plist; do
+    info "Uninstalling launchd agents for prefix $AGENT_PREFIX"
+    for plist in "$LAUNCH_DIR"/"$AGENT_PREFIX".*.plist; do
         [ -f "$plist" ] || continue
         launchctl unload "$plist" 2>/dev/null || true
         rm "$plist"
@@ -160,10 +250,14 @@ uninstall() {
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-[ "${1:-}" = "--uninstall" ] && uninstall
+parse_args "$@"
+validate_agent_prefix
+[ "$UNINSTALL" = true ] && uninstall
 
 echo "wallpaper-theme-sync installer"
 echo "==============================="
+echo ""
+echo "Launchd prefix: $AGENT_PREFIX"
 echo ""
 
 check_deps

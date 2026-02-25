@@ -7,7 +7,7 @@
 # Display to extract wallpaper from (1 = primary, 2 = secondary, etc.)
 display = 1
 
-# Number of dominant colors to extract via median-cut quantization
+# Number of dominant colors to extract via median-cut quantization (1-256)
 n_colors = 8
 
 [scheme]

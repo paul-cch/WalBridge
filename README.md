@@ -33,6 +33,7 @@ Automatically syncs SketchyBar, JankyBorders, Kitty, Neovim, Yazi, Starship, Ope
 └── light/    # 39 wallpapers for light mode
 ```
 
+- Override the root with `WALLPAPER_DIR=/path/to/wallpapers` if your folders are elsewhere.
 - Shuffles through all wallpapers before repeating (tracked in index files)
 - Runs on a 30-minute launchd timer + at login
 - When the system appearance changes, the next cycle automatically picks from the correct folder
@@ -58,6 +59,19 @@ The `wallpaper-faded` daemon keeps a persistent overlay window on top of the des
 | `wipe-left/right/up/down` | Reveal new wallpaper with a directional wipe |
 | `grow` | Old wallpaper scales up and fades out |
 
+## Install
+
+```bash
+# Standard install/update
+bash install.sh
+
+# Optional: install prebuilt borders-animated binary (checksum verified)
+bash install.sh --install-prebuilt-borders
+
+# Optional: customize launchd label prefix
+WTS_AGENT_PREFIX=com.yourname.wallpaper-sync bash install.sh
+```
+
 ## Configuration
 
 All tuning parameters are configurable via `~/.config/wallpaper-colors/config.toml`. The file is optional — defaults are used when absent. See `configs/wallpaper-colors/config.toml.example` for the full reference.
@@ -67,7 +81,7 @@ Key options:
 ```toml
 [general]
 display = 1           # Which display to extract from (1 = primary)
-n_colors = 8          # Palette size for median-cut quantization
+n_colors = 8          # Palette size for median-cut quantization (1-256)
 
 [scheme]
 min_saturation = 0.45 # Accent color minimum saturation floor
@@ -188,6 +202,11 @@ active_color=gradient(top_left=0xffCOLOR1,bottom_right=0xffCOLOR2)
 
 **IPC**: Live color updates use the homebrew `borders` binary for IPC — both share the same mach bootstrap port (`borders`), so the lightweight homebrew binary can send gradient config to the running `borders-animated` process without spawning a heavyweight duplicate.
 
+**Install behavior**:
+- `install.sh` skips the checked-in binary by default.
+- To install it, run `bash install.sh --install-prebuilt-borders`.
+- Installer validates `checksums/borders-animated.sha256` before copying.
+
 **Limitations**:
 - arm64 only (Apple Silicon). No universal binary or x86_64 build.
 - No automated build pipeline — the binary is checked into the repo as a pre-built artifact.
@@ -239,10 +258,13 @@ bash ~/.config/wallpaper-colors/wallpaper_cycle.sh
 
 | Agent | Purpose |
 |---|---|
-| `com.paulcouach.wallpaper-cycle` | Runs `wallpaper_cycle.sh` every 30 min + at login |
-| `com.paulcouach.wallpaper-colors` | Triggers `wallpaper_colors.py` via WatchPaths + 2-min poll |
-| `com.paulcouach.wallpaper-faded` | Persistent transition daemon (`KeepAlive`) |
-| `com.paulcouach.borders-animated` | Runs `borders-animated` with `KeepAlive` |
+| `com.wallpaper-theme-sync.wallpaper-cycle` | Runs `wallpaper_cycle.sh` every 30 min + at login |
+| `com.wallpaper-theme-sync.wallpaper-colors` | Triggers `wallpaper_colors.py` via WatchPaths + 2-min poll |
+| `com.wallpaper-theme-sync.wallpaper-faded` | Persistent transition daemon (`KeepAlive`) |
+| `com.wallpaper-theme-sync.borders-animated` | Runs `borders-animated` with `KeepAlive` |
+| `com.wallpaper-theme-sync.theme-watcher` | Polls dark/light mode changes and triggers cycle + sync |
+
+`WTS_AGENT_PREFIX` can override `com.wallpaper-theme-sync` during install/uninstall.
 
 ## File locations
 
@@ -269,10 +291,11 @@ wallpaper-theme-sync/
 │   ├── wallpaper_cycle.sh       # Theme-aware wallpaper cycler
 │   └── borders-cycle.sh         # Borders startup with fixed gradient
 ├── launchd/
-│   ├── com.paulcouach.wallpaper-cycle.plist
-│   ├── com.paulcouach.wallpaper-colors.plist
-│   ├── com.paulcouach.wallpaper-faded.plist
-│   └── com.paulcouach.borders-animated.plist
+│   ├── wallpaper-cycle.plist
+│   ├── wallpaper-colors.plist
+│   ├── wallpaper-faded.plist
+│   ├── borders-animated.plist
+│   └── theme-watcher.plist
 └── borders-animated             # Custom JankyBorders fork binary (arm64)
 ```
 
@@ -329,10 +352,11 @@ wallpaper-theme-sync/
 └── borders-animated             # Custom JankyBorders fork (arm64)
 
 ~/Library/LaunchAgents/
-├── com.paulcouach.wallpaper-cycle.plist
-├── com.paulcouach.wallpaper-colors.plist
-├── com.paulcouach.wallpaper-faded.plist
-└── com.paulcouach.borders-animated.plist
+├── com.wallpaper-theme-sync.wallpaper-cycle.plist
+├── com.wallpaper-theme-sync.wallpaper-colors.plist
+├── com.wallpaper-theme-sync.wallpaper-faded.plist
+├── com.wallpaper-theme-sync.borders-animated.plist
+└── com.wallpaper-theme-sync.theme-watcher.plist
 ```
 
 ## Usage
@@ -378,6 +402,8 @@ cp -n configs/wallpaper-colors/config.toml.example ~/.config/wallpaper-colors/co
 cp launchd/*.plist ~/Library/LaunchAgents/
 ```
 
+For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTHON__`, and `__AGENT_PREFIX__` placeholders automatically).
+
 ## Dependencies
 
 - **Python 3.11+** with Pillow (`pip install Pillow`) — 3.11+ required for `tomllib`
@@ -385,7 +411,7 @@ cp launchd/*.plist ~/Library/LaunchAgents/
 - **desktoppr** (`brew install desktoppr`) — wallpaper path detection + multi-space propagation
 - **SketchyBar** (`brew install FelixKratz/formulae/sketchybar`)
 - **JankyBorders** (`brew install borders`) — homebrew binary used for IPC to running `borders-animated`
-- **borders-animated** (custom JankyBorders fork with gradient support, included — arm64 only)
+- **borders-animated** (custom JankyBorders fork with gradient support, optional install via `--install-prebuilt-borders`, arm64 only)
 - **Kitty** with `allow_remote_control yes` and `listen_on unix:/tmp/kitty-sock-*`
 - **Neovim** with `wallpaper-sync.lua` config
 - **Yazi** — flavor applied on launch, no extra config needed

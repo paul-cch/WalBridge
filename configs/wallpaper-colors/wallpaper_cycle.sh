@@ -6,7 +6,8 @@ set -euo pipefail
 # and sets the next one via desktoppr. Tracks position in an index file so it
 # cycles through all wallpapers before repeating.
 
-WALLPAPER_DIR="$HOME/Pictures/wallpaper"
+# Override with WALLPAPER_DIR to support non-default folder layouts.
+WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/wallpaper}"
 STATE_DIR="$HOME/.config/wallpaper-colors"
 DESKTOPPR=$(command -v desktoppr 2>/dev/null || echo "/usr/local/bin/desktoppr")
 
@@ -20,6 +21,12 @@ fi
 FOLDER="$WALLPAPER_DIR/$THEME"
 INDEX_FILE="$STATE_DIR/.cycle_${THEME}_index"
 ORDER_FILE="$STATE_DIR/.cycle_${THEME}_order"
+
+# Fast fail with a clear message when theme folder is missing.
+if [[ ! -d "$FOLDER" ]]; then
+    echo "[$(date +%H:%M:%S)] Missing wallpaper folder: $FOLDER" >&2
+    exit 1
+fi
 
 # Build sorted list of wallpapers
 ALL_FILES=()

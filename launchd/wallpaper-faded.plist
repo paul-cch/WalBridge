@@ -3,19 +3,18 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.paulcouach.theme-watcher</string>
+	<string>__AGENT_PREFIX__.wallpaper-faded</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/bin/bash</string>
-		<string>__HOME__/.config/wallpaper-colors/theme_watcher.sh</string>
+		<string>__HOME__/.local/bin/WallpaperFaded.app/Contents/MacOS/wallpaper-faded</string>
 	</array>
-	<key>KeepAlive</key>
-	<true/>
 	<key>RunAtLoad</key>
 	<true/>
+	<key>KeepAlive</key>
+	<true/>
 	<key>StandardOutPath</key>
-	<string>__HOME__/.config/wallpaper-colors/theme_watcher.log</string>
+	<string>__HOME__/.config/wallpaper-colors/faded.log</string>
 	<key>StandardErrorPath</key>
-	<string>__HOME__/.config/wallpaper-colors/theme_watcher.log</string>
+	<string>__HOME__/.config/wallpaper-colors/faded.log</string>
 </dict>
 </plist>

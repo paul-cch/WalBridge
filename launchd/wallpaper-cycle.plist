@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.paulcouach.wallpaper-cycle</string>
+	<string>__AGENT_PREFIX__.wallpaper-cycle</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
 		<string>__HOME__/.config/wallpaper-colors/wallpaper_cycle.sh</string>
 	</array>
 	<key>StartInterval</key>
-	<integer>600</integer>
+	<integer>1800</integer>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardOutPath</key>
