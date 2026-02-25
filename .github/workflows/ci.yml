@@ -16,5 +16,13 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Shell syntax check
+        run: |
+          bash -n install.sh \
+            configs/wallpaper-colors/theme_watcher.sh \
+            configs/wallpaper-colors/wallpaper_cycle.sh \
+            configs/sketchybar/sketchybarrc \
+            configs/sketchybar/plugins/*.sh
+
       - name: Run unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v

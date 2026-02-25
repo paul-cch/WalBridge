@@ -5,7 +5,11 @@
 1. Clone the repo
 2. Install dependencies: `pip3 install -r requirements.txt`
 3. Install external tools: `brew install desktoppr`
-4. Run manually: `python3 configs/wallpaper-colors/wallpaper_colors.py -v`
+4. Enable commit hooks: `git config core.hooksPath .githooks`
+5. Run tests: `python3 -m unittest discover -s tests -p 'test_*.py' -v`
+6. Run shell syntax checks:
+   `bash -n install.sh configs/wallpaper-colors/theme_watcher.sh configs/wallpaper-colors/wallpaper_cycle.sh configs/sketchybar/sketchybarrc configs/sketchybar/plugins/*.sh`
+7. Run manually: `python3 configs/wallpaper-colors/wallpaper_colors.py -v`
 
 ## Adding a New Target App
 
@@ -93,7 +97,7 @@ tools/
 ## Code Style
 
 - Python: follow existing style — clean, minimal, no type annotations on internal functions
-- Shell: `set -euo pipefail` in every script
+- Shell: use strict mode (`set -uo pipefail`, plus `-e` where fail-fast is desired)
 - All config file writes **must** use `atomic_write()` from `wcsync/utils.py`
 - Color formats: `hexc()` for `0xAARRGGBB`, `hex6()` for `#rrggbb`
 - Binary lookups: use `_find_bin()` in reloaders, `shutil.which()` in modules
@@ -130,3 +134,11 @@ feat: add multi-monitor support
 fix(capture): retry on CGWindowListCreateImage failure
 refactor: modularize wallpaper_colors.py into wcsync package
 ```
+
+## SketchyBar Example Config
+
+`configs/sketchybar/sketchybarrc` is intentionally public-safe by default:
+
+- Private/personal widgets are opt-in (`SKETCHYBAR_ENABLE_IRIS=1`, etc.)
+- Missing private dependencies should not break the default profile
+- New plugin references must include matching scripts under `configs/sketchybar/plugins/`
