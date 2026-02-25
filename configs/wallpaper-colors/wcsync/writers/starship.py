@@ -2,7 +2,7 @@
 
 import os
 
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, log
 
 OUTPUT_PATH = os.path.expanduser("~/.config/starship.toml")
 
@@ -45,4 +45,15 @@ staged = ""
 renamed = ""
 deleted = ""
 """
+    # Don't overwrite user's custom starship config
+    if os.path.isfile(OUTPUT_PATH):
+        try:
+            with open(OUTPUT_PATH, "r") as f:
+                if "Auto-generated from wallpaper" not in f.readline():
+                    alt = os.path.expanduser("~/.config/wallpaper-colors/starship.toml")
+                    atomic_write(alt, content)
+                    log(f"Starship: user config detected, wrote to {alt}")
+                    return
+        except OSError:
+            pass
     atomic_write(OUTPUT_PATH, content)
