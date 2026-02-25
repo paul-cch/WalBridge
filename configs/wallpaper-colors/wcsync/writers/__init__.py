@@ -4,13 +4,16 @@ from ..config import Config
 from ..utils import log
 
 from . import (
+    alacritty,
     borders,
+    ghostty,
     hydrotodo,
     kitty,
     neovim,
     opencode,
     sketchybar,
     starship,
+    wezterm,
     yazi,
 )
 
@@ -19,6 +22,9 @@ _WRITERS = {
     "sketchybar": sketchybar,
     "borders": borders,
     "kitty": kitty,
+    "wezterm": wezterm,
+    "alacritty": alacritty,
+    "ghostty": ghostty,
     "neovim": neovim,
     "lualine": neovim,  # lualine is part of the neovim target toggle
     "yazi": yazi,

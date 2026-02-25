@@ -1,6 +1,6 @@
 # Wallpaper Theme Sync
 
-Automatically syncs SketchyBar, JankyBorders, Kitty, Neovim, Yazi, Starship, OpenCode, and HydroToDo colors to match the current macOS wallpaper — with animated transitions between wallpapers (fade, slide, wipe, grow), theme-aware wallpaper cycling, and multi-monitor support.
+Automatically syncs SketchyBar, JankyBorders, Kitty, WezTerm, Alacritty, Ghostty, Neovim, Yazi, Starship, OpenCode, and HydroToDo colors to match the current macOS wallpaper — with animated transitions between wallpapers (fade, slide, wipe, grow), theme-aware wallpaper cycling, and multi-monitor support.
 
 ## How it works
 
@@ -15,10 +15,13 @@ Automatically syncs SketchyBar, JankyBorders, Kitty, Neovim, Yazi, Starship, Ope
 │  wallpaper-faded     │                           │  colors.sh       │──▶ SketchyBar
 │  (Swift daemon)      │                           │  border_colors   │──▶ JankyBorders
 │  animated transitions│     ┌────────────────┐    │  wallpaper.conf  │──▶ Kitty
-└─────────────────────┘     │ wallpaper_colors│───▶│  nvim_colors.lua │──▶ Neovim
-                            │ .py + wcsync/   │    │  flavor.toml     │──▶ Yazi
-  WatchPaths trigger ──────▶│                 │    │  starship.toml   │──▶ Starship
-                            └────────────────┘    │  wallpaper.json  │──▶ OpenCode
+└─────────────────────┘     │ wallpaper_colors│───▶│  wallpaper.toml  │──▶ WezTerm
+                            │ .py + wcsync/   │    │  wallpaper.toml  │──▶ Alacritty
+  WatchPaths trigger ──────▶│                 │    │  wallpaper.conf  │──▶ Ghostty
+                            └────────────────┘    │  nvim_colors.lua │──▶ Neovim
+                                                  │  flavor.toml     │──▶ Yazi
+                                                  │  starship.toml   │──▶ Starship
+                                                  │  wallpaper.json  │──▶ OpenCode
                                                   │  hydrotodo.json  │──▶ HydroToDo
                                                   └──────────────────┘
 ```
@@ -45,7 +48,7 @@ Automatically syncs SketchyBar, JankyBorders, Kitty, Neovim, Yazi, Starship, Ope
 3. **Scheme**: Picks accent (most vibrant — or manual override via config), dark/light backgrounds, a gradient secondary (most hue-distant palette color), and generates named colors at fixed hues matching the accent's saturation/brightness.
 4. **Vivify**: Border colors use the same hues but with configurable saturation/value floors so they pop on screen.
 5. **Write**: Regenerates all config files for every enabled target app.
-6. **Reload**: SketchyBar (`--reload`), JankyBorders (IPC via homebrew `borders`), Kitty (`kitten @ set-colors`), Neovim (`--remote-send` to all instances). Yazi and Starship apply on next launch/prompt.
+6. **Reload**: SketchyBar (`--reload`), JankyBorders (IPC via homebrew `borders`), Kitty (`kitten @ set-colors`), Neovim (`--remote-send` to all instances). WezTerm, Alacritty, Ghostty, Yazi, Starship, OpenCode, and HydroToDo apply on next app reload/launch/prompt.
 7. **Dedup**: Caches a perceptual hash (sha256 of 16x16 thumbnail) so unchanged wallpapers are skipped in ~370ms.
 
 ### Wallpaper transitions
@@ -98,6 +101,9 @@ opacity = 179         # Border opacity (0–255)
 sketchybar = true
 borders = true
 kitty = true
+wezterm = true
+alacritty = true
+ghostty = true
 neovim = true
 yazi = true
 starship = true
@@ -130,6 +136,9 @@ configs/wallpaper-colors/
 │   │   ├── sketchybar.py
 │   │   ├── borders.py
 │   │   ├── kitty.py
+│   │   ├── wezterm.py
+│   │   ├── alacritty.py
+│   │   ├── ghostty.py
 │   │   ├── neovim.py           # Also writes lualine theme
 │   │   ├── lualine.py          # Re-exports from neovim
 │   │   ├── yazi.py
@@ -219,6 +228,9 @@ active_color=gradient(top_left=0xffCOLOR1,bottom_right=0xffCOLOR2)
 | **SketchyBar** | `~/.config/sketchybar/colors.sh` | `sketchybar --reload` |
 | **JankyBorders** | `~/.config/wallpaper-colors/border_colors` | IPC via homebrew `borders` binary |
 | **Kitty** | `~/.config/kitty/themes/wallpaper.conf` | `kitten @ set-colors` via unix socket |
+| **WezTerm** | `~/.config/wezterm/colors/wallpaper.toml` | Applied on next WezTerm config reload |
+| **Alacritty** | `~/.config/alacritty/themes/wallpaper.toml` | Applied on next Alacritty config reload |
+| **Ghostty** | `~/.config/ghostty/themes/wallpaper.conf` | Applied on next Ghostty config reload/restart |
 | **Neovim** | `~/.config/wallpaper-colors/nvim_colors.lua` + lualine theme | `nvim --remote-send` to all instances |
 | **Yazi** | `~/.config/yazi/flavors/wallpaper.yazi/flavor.toml` | Applied on next yazi launch |
 | **Starship** | `~/.config/starship.toml` | Applied on next prompt render |
@@ -238,11 +250,24 @@ SKETCHYBAR_ENABLE_SUPERCHARGE=1 \
 ~/.config/sketchybar/sketchybarrc
 ```
 
-### Borders/Yazi theming overrides
+### Terminal/Borders/Yazi theming overrides
 
 Defaults are still plug-and-play, but you can customize paths/names when integrating into a different dotfiles layout:
 
 ```bash
+# WezTerm writer
+export WALLPAPER_WEZTERM_SCHEME_NAME="wallpaper"
+# Optional explicit path (overrides scheme name path):
+# export WALLPAPER_WEZTERM_OUTPUT_PATH="$HOME/.config/wezterm/colors/wallpaper.toml"
+
+# Alacritty writer
+export WALLPAPER_ALACRITTY_OUTPUT_PATH="$HOME/.config/alacritty/themes/wallpaper.toml"
+
+# Ghostty writer
+export WALLPAPER_GHOSTTY_THEME_FILE="wallpaper.conf"
+# Optional explicit path (overrides theme file path):
+# export WALLPAPER_GHOSTTY_OUTPUT_PATH="$HOME/.config/ghostty/themes/wallpaper.conf"
+
 # Borders writer + borders-cycle.sh
 export WALLPAPER_BORDER_COLORS_FILE="$HOME/.config/wallpaper-colors/border_colors"
 export WALLPAPER_BORDERS_BIN="$HOME/.local/bin/borders-animated"
@@ -251,6 +276,9 @@ export WALLPAPER_BORDERS_BIN="$HOME/.local/bin/borders-animated"
 export WALLPAPER_YAZI_FLAVOR_NAME="wallpaper"
 # Optional explicit path (overrides flavor name derivation):
 # export WALLPAPER_YAZI_OUTPUT_PATH="$HOME/.config/yazi/flavors/wallpaper.yazi/flavor.toml"
+# Optional theme selector behavior:
+# export WALLPAPER_YAZI_THEME_PATH="$HOME/.config/yazi/theme.toml"
+# export WALLPAPER_YAZI_WRITE_THEME_SELECTOR=1
 ```
 
 ### Neovim details
@@ -264,14 +292,16 @@ Requires `~/.config/nvim/lua/config/wallpaper-sync.lua`.
 
 ### Yazi details
 
-Generates a complete yazi flavor at `~/.config/yazi/flavors/wallpaper.yazi/flavor.toml` with all UI elements themed: manager, tabs, mode indicators, status bar, file type colors, borders, picker, input, and notifications. Yazi does not hot-reload flavors — the new theme applies on next launch.
+Generates a complete yazi flavor at `~/.config/yazi/flavors/wallpaper.yazi/flavor.toml` with all UI elements themed: manager, tabs, mode indicators, status bar, file type colors, borders, picker, input, and notifications.
 
-Set in `~/.config/yazi/theme.toml`:
+By default, the writer also manages `~/.config/yazi/theme.toml` with:
 ```toml
 [flavor]
-dark  = "wallpaper"
+dark = "wallpaper"
 light = "wallpaper"
 ```
+
+If `theme.toml` already exists and is not auto-generated by wallpaper sync, it is left untouched and a helper selector is written to `~/.config/wallpaper-colors/yazi.theme.toml`.
 
 ### `wallpaper_cycle.sh`
 
@@ -364,6 +394,9 @@ wallpaper-theme-sync/
 ~/.config/sketchybar/colors.sh   # Auto-generated color scheme
 ~/.config/borders/bordersrc      # Auto-generated border config
 ~/.config/kitty/themes/wallpaper.conf  # Auto-generated terminal colors
+~/.config/wezterm/colors/wallpaper.toml  # Auto-generated WezTerm scheme
+~/.config/alacritty/themes/wallpaper.toml  # Auto-generated Alacritty theme
+~/.config/ghostty/themes/wallpaper.conf  # Auto-generated Ghostty theme
 ~/.config/nvim/lua/config/wallpaper-sync.lua  # Loads nvim_colors.lua
 ~/.config/starship.toml          # Auto-generated prompt config
 ~/.config/opencode/themes/wallpaper.json  # Auto-generated TUI theme
@@ -441,8 +474,11 @@ For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTH
 - **JankyBorders** (`brew install borders`) — homebrew binary used for IPC to running `borders-animated`
 - **borders-animated** (custom JankyBorders fork with gradient support, optional install via `--install-prebuilt-borders`, arm64 only)
 - **Kitty** with `allow_remote_control yes` and `listen_on unix:/tmp/kitty-sock-*`
+- **WezTerm** (optional) — set `color_scheme = "wallpaper"` in your WezTerm config
+- **Alacritty** (optional) — import generated `wallpaper.toml` in `alacritty.toml`
+- **Ghostty** (optional) — set `theme = wallpaper.conf` in Ghostty config
 - **Neovim** with `wallpaper-sync.lua` config
-- **Yazi** — flavor applied on launch, no extra config needed
+- **Yazi** — flavor applied on launch; theme selector is auto-managed unless custom `theme.toml` is detected
 - **Xcode Command Line Tools** (for `swiftc`)
 
 ## Performance

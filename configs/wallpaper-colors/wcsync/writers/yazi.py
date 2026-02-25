@@ -2,15 +2,59 @@
 
 import os
 
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, log
 
 DEFAULT_FLAVOR_NAME = "wallpaper"
+DEFAULT_THEME_PATH = "~/.config/yazi/theme.toml"
+YAZI_THEME_MARKER = "# Auto-generated from wallpaper"
+
+
+def _flavor_name():
+    return os.environ.get("WALLPAPER_YAZI_FLAVOR_NAME", DEFAULT_FLAVOR_NAME)
 
 
 def _output_path():
-    flavor_name = os.environ.get("WALLPAPER_YAZI_FLAVOR_NAME", DEFAULT_FLAVOR_NAME)
+    flavor_name = _flavor_name()
     default_path = f"~/.config/yazi/flavors/{flavor_name}.yazi/flavor.toml"
     return os.path.expanduser(os.environ.get("WALLPAPER_YAZI_OUTPUT_PATH", default_path))
+
+
+def _theme_path():
+    return os.path.expanduser(os.environ.get("WALLPAPER_YAZI_THEME_PATH", DEFAULT_THEME_PATH))
+
+
+def _should_write_selector():
+    raw = os.environ.get("WALLPAPER_YAZI_WRITE_THEME_SELECTOR", "1").strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
+def _write_theme_selector():
+    if not _should_write_selector():
+        return
+
+    flavor_name = _flavor_name()
+    content = f"""{YAZI_THEME_MARKER} — do not edit manually
+# Regenerate: python3 ~/.config/wallpaper-colors/wallpaper_colors.py
+
+[flavor]
+dark = "{flavor_name}"
+light = "{flavor_name}"
+"""
+    target = _theme_path()
+
+    if os.path.isfile(target):
+        try:
+            with open(target, "r", encoding="utf-8") as f:
+                first_line = f.readline()
+                if YAZI_THEME_MARKER not in first_line:
+                    alt = os.path.expanduser("~/.config/wallpaper-colors/yazi.theme.toml")
+                    atomic_write(alt, content)
+                    log(f"Yazi: user theme.toml detected, wrote selector to {alt}")
+                    return
+        except OSError:
+            pass
+
+    atomic_write(target, content)
 
 
 def write(scheme, config=None):
@@ -169,6 +213,7 @@ rules = [
   {{ url = "*", fg = "{fg}" }},
   {{ url = "*/", fg = "{accent}" }},
 ]
-# : }}}}
+    # : }}}}
 """
     atomic_write(_output_path(), content)
+    _write_theme_selector()

@@ -149,5 +149,9 @@ To support different local layouts, these environment variables are supported:
 
 - `WALLPAPER_BORDER_COLORS_FILE` (used by borders writer + `borders-cycle.sh`)
 - `WALLPAPER_BORDERS_BIN` (used by `borders-cycle.sh`)
+- `WALLPAPER_WEZTERM_SCHEME_NAME` / `WALLPAPER_WEZTERM_OUTPUT_PATH`
+- `WALLPAPER_ALACRITTY_OUTPUT_PATH`
+- `WALLPAPER_GHOSTTY_THEME_FILE` / `WALLPAPER_GHOSTTY_OUTPUT_PATH`
 - `WALLPAPER_YAZI_FLAVOR_NAME` (changes default Yazi flavor folder name)
 - `WALLPAPER_YAZI_OUTPUT_PATH` (explicit Yazi flavor output path)
+- `WALLPAPER_YAZI_THEME_PATH` / `WALLPAPER_YAZI_WRITE_THEME_SELECTOR`
