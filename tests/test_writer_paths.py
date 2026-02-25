@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, str(WCSYNC_ROOT))
 
-from wcsync.writers import alacritty, borders, ghostty, wezterm, yazi
+from wcsync.writers import alacritty, borders, btop, ghostty, iterm2, tmux, wezterm, yazi
 
 
 SCHEME = {
@@ -156,6 +156,45 @@ class WriterPathOverrideTests(unittest.TestCase):
             text = out_path.read_text(encoding="utf-8")
             self.assertIn("palette = 0=", text)
             self.assertIn("background =", text)
+
+    def test_iterm2_writer_respects_output_override(self):
+        with tempfile.TemporaryDirectory() as td:
+            out_path = pathlib.Path(td) / "iterm2" / "wallpaper.itermcolors"
+            with patch.dict(os.environ, {"WALLPAPER_ITERM_OUTPUT_PATH": str(out_path)}):
+                iterm2.write(SCHEME)
+
+            self.assertTrue(out_path.is_file())
+            text = out_path.read_text(encoding="utf-8")
+            self.assertIn("<key>Background Color</key>", text)
+            self.assertIn("<key>Ansi 15 Color</key>", text)
+
+    def test_tmux_writer_respects_output_override(self):
+        with tempfile.TemporaryDirectory() as td:
+            out_path = pathlib.Path(td) / "tmux" / "wallpaper.conf"
+            with patch.dict(os.environ, {"WALLPAPER_TMUX_OUTPUT_PATH": str(out_path)}):
+                tmux.write(SCHEME)
+
+            self.assertTrue(out_path.is_file())
+            text = out_path.read_text(encoding="utf-8")
+            self.assertIn('set -g status-style "fg=', text)
+            self.assertIn("source-file ~/.config/tmux/themes/wallpaper.conf", text)
+
+    def test_btop_writer_uses_theme_name_for_default_path(self):
+        with tempfile.TemporaryDirectory() as td:
+            home = pathlib.Path(td)
+            expected = home / ".config" / "btop" / "themes" / "sunset.theme"
+            with patch.dict(
+                os.environ,
+                {
+                    "HOME": str(home),
+                    "WALLPAPER_BTOP_THEME_NAME": "sunset",
+                },
+                clear=False,
+            ):
+                btop.write(SCHEME)
+
+            self.assertTrue(expected.is_file())
+            self.assertIn('theme[main_bg]="#', expected.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

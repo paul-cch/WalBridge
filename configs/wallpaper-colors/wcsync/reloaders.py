@@ -129,8 +129,9 @@ def reload_all(scheme, config=None):
         except FileNotFoundError as e:
             log(f"Skipping {name} reload: {e}")
 
-    # Yazi, Starship, OpenCode, HydroTodo, WezTerm, Alacritty, Ghostty —
-    # no direct hot-reload here; applied on next launch/reload/prompt.
+    # Yazi, Starship, OpenCode, HydroTodo, WezTerm, Alacritty, Ghostty,
+    # iTerm2, tmux, btop — no direct hot-reload here; applied on next
+    # launch/reload/prompt.
     for p in procs:
         try:
             p.wait(timeout=5)

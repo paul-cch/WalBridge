@@ -5,14 +5,17 @@ from ..utils import log
 
 from . import (
     alacritty,
+    btop,
     borders,
     ghostty,
     hydrotodo,
+    iterm2,
     kitty,
     neovim,
     opencode,
     sketchybar,
     starship,
+    tmux,
     wezterm,
     yazi,
 )
@@ -25,6 +28,9 @@ _WRITERS = {
     "wezterm": wezterm,
     "alacritty": alacritty,
     "ghostty": ghostty,
+    "iterm2": iterm2,
+    "tmux": tmux,
+    "btop": btop,
     "neovim": neovim,
     "lualine": neovim,  # lualine is part of the neovim target toggle
     "yazi": yazi,
@@ -32,8 +38,6 @@ _WRITERS = {
     "opencode": opencode,
     "hydrotodo": hydrotodo,
 }
-
-
 
 def write_all(scheme, config=None):
     """Write all enabled config files.
