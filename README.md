@@ -5,6 +5,7 @@ Automatically syncs SketchyBar, JankyBorders, Kitty, WezTerm, Alacritty, Ghostty
 Inspired by Linux theming tools like `pywal`, `wallust`, `wpgtk`, and `Stylix` (NixOS), this project brings similar desktop ricing automation to macOS.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md) for project policies.
 
 ## How it works
 
@@ -231,10 +232,11 @@ active_color=gradient(top_left=0xffCOLOR1,bottom_right=0xffCOLOR2)
 - `install.sh` skips the checked-in binary by default.
 - To install it, run `bash install.sh --install-prebuilt-borders`.
 - Installer validates `checksums/borders-animated.sha256` before copying.
+- You can build from source with `bash tools/build-borders-animated.sh` (details: [`docs/borders-animated-build.md`](docs/borders-animated-build.md)).
 
 **Limitations**:
 - arm64 only (Apple Silicon). No universal binary or x86_64 build.
-- No automated build pipeline — the binary is checked into the repo as a pre-built artifact.
+- No CI build attestation yet for the gradient-enabled forked binary.
 - Upstream JankyBorders changes must be manually cherry-picked into the fork.
 
 ### Target apps
@@ -367,11 +369,16 @@ bash ~/.config/wallpaper-colors/wallpaper_cycle.sh
 ```
 wallpaper-theme-sync/
 ├── README.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
 ├── tools/
 │   ├── wallpaper-faded.swift    # Persistent transition daemon source
 │   ├── wallpaper-faded          # Compiled binary
 │   ├── wallpaper-fade.swift     # Standalone CLI tool source
-│   └── wallpaper-fade           # Compiled binary
+│   ├── wallpaper-fade           # Compiled binary
+│   └── build-borders-animated.sh  # Source-build helper for borders
+├── docs/
+│   └── borders-animated-build.md  # Reproducible borders build notes
 ├── configs/wallpaper-colors/
 │   ├── wallpaper_colors.py      # Entry point
 │   ├── config.toml.example      # Config reference
@@ -514,6 +521,7 @@ For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTH
 - **SketchyBar** (`brew install FelixKratz/formulae/sketchybar`)
 - **JankyBorders** (`brew install borders`) — homebrew binary used for IPC to running `borders-animated`
 - **borders-animated** (custom JankyBorders fork with gradient support, optional install via `--install-prebuilt-borders`, arm64 only)
+- **Source build for borders-animated (optional)**: `git`, `make`, and `codesign` (macOS) when using `tools/build-borders-animated.sh`
 - **Kitty** with `allow_remote_control yes` and `listen_on unix:/tmp/kitty-sock-*`
 - **WezTerm** (optional) — set `color_scheme = "wallpaper"` in your WezTerm config
 - **Alacritty** (optional) — import generated `wallpaper.toml` in `alacritty.toml`

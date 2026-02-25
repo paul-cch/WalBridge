@@ -9,6 +9,9 @@ All notable changes to this project are documented in this file.
 - New target writers for `WezTerm`, `Alacritty`, and `Ghostty`.
 - Improved Yazi flavor handling with safer theme selector behavior.
 - One-time setup helper: `configs/wallpaper-colors/setup-targets.sh`.
+- Source-build helper for borders: `tools/build-borders-animated.sh`.
+- Governance docs: `CODE_OF_CONDUCT.md` and `SECURITY.md`.
+- GitHub contribution templates: issue forms and pull request template.
 - Path/name overrides for borders, Yazi, WezTerm, Alacritty, Ghostty, iTerm2, tmux, and btop.
 - Unit tests for writer path overrides and tmux reload behavior.
 - CI shell syntax checks and Python unit test workflow.

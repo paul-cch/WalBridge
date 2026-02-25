@@ -23,6 +23,7 @@ jobs:
             configs/wallpaper-colors/wallpaper_cycle.sh \
             configs/wallpaper-colors/borders-cycle.sh \
             configs/wallpaper-colors/setup-targets.sh \
+            tools/build-borders-animated.sh \
             configs/sketchybar/sketchybarrc \
             configs/sketchybar/plugins/*.sh
 

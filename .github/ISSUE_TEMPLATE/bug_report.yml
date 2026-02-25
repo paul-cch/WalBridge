@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible bug or regression
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please include enough detail to reproduce quickly.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened and what did you expect?
+      placeholder: A concise description of the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands and sequence.
+      placeholder: |
+        1. Run ...
+        2. Change wallpaper ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: macOS version, shell, Python version, hardware architecture.
+      placeholder: macOS 15.x, zsh, Python 3.11.x, arm64
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Include `~/.config/wallpaper-colors/*.log` excerpts if possible.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Preflight
+      options:
+        - label: I ran the latest branch/tests and confirmed this is still reproducible.
+          required: true
+        - label: I checked existing issues for duplicates.
+          required: true

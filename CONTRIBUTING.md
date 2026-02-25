@@ -8,8 +8,14 @@
 4. Enable commit hooks: `git config core.hooksPath .githooks`
 5. Run tests: `python3 -m unittest discover -s tests -p 'test_*.py' -v`
 6. Run shell syntax checks:
-   `bash -n install.sh configs/wallpaper-colors/theme_watcher.sh configs/wallpaper-colors/wallpaper_cycle.sh configs/wallpaper-colors/borders-cycle.sh configs/wallpaper-colors/setup-targets.sh configs/sketchybar/sketchybarrc configs/sketchybar/plugins/*.sh`
+   `bash -n install.sh configs/wallpaper-colors/theme_watcher.sh configs/wallpaper-colors/wallpaper_cycle.sh configs/wallpaper-colors/borders-cycle.sh configs/wallpaper-colors/setup-targets.sh tools/build-borders-animated.sh configs/sketchybar/sketchybarrc configs/sketchybar/plugins/*.sh`
 7. Run manually: `python3 configs/wallpaper-colors/wallpaper_colors.py -v`
+
+## Community and Security
+
+- Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) in all project interactions.
+- Report vulnerabilities privately (see [SECURITY.md](SECURITY.md)); do not open public security issues.
+- Use GitHub issue templates for bug reports and feature requests.
 
 ## Adding a New Target App
 

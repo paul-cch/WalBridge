@@ -1,0 +1,41 @@
+name: Feature request
+description: Propose a new capability or integration
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+      placeholder: I want to theme X automatically because ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should happen?
+      placeholder: Add writer + optional reloader for ...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds or other approaches you've tried.
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and constraints
+      description: Compatibility requirements, edge cases, or constraints.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: This is not a duplicate of an existing feature request.
+          required: true
+        - label: I can help test this change.
+          required: false
