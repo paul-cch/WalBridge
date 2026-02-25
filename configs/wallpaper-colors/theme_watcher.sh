@@ -6,7 +6,7 @@ set -euo pipefail
 STATE_DIR="$HOME/.config/wallpaper-colors"
 THEME_FILE="$STATE_DIR/.last_theme"
 CYCLE_SCRIPT="$HOME/.config/wallpaper-colors/wallpaper_cycle.sh"
-PYTHON="/Library/Frameworks/Python.framework/Versions/Current/bin/python3"
+PYTHON="${WALLPAPER_PYTHON:-$(command -v python3)}"
 COLORS_SCRIPT="$HOME/.config/wallpaper-colors/wallpaper_colors.py"
 
 mkdir -p "$STATE_DIR"

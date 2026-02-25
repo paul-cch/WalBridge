@@ -14,7 +14,7 @@ set -euo pipefail
 # Works standalone or as a Raycast Script Command.
 
 SCRIPT_DIR="$HOME/.config/wallpaper-colors"
-PYTHON="/Library/Frameworks/Python.framework/Versions/Current/bin/python3"
+PYTHON="${WALLPAPER_PYTHON:-$(command -v python3)}"
 
 bash "$SCRIPT_DIR/wallpaper_cycle.sh"
 sleep 0.5
