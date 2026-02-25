@@ -14,5 +14,5 @@ borders-animated
 tools/wallpaper-faded
 tools/wallpaper-fade
 
-# Claude Code local settings
-.claude/settings.local.json
+# Claude Code
+.claude/

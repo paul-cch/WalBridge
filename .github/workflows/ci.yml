@@ -2,19 +2,17 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  tests:
+  shell-lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - uses: actions/checkout@v4
 
       - name: Shell syntax check
         run: |
@@ -22,10 +20,21 @@ jobs:
             configs/wallpaper-colors/theme_watcher.sh \
             configs/wallpaper-colors/wallpaper_cycle.sh \
             configs/wallpaper-colors/borders-cycle.sh \
+            configs/wallpaper-colors/next-wallpaper.sh \
             configs/wallpaper-colors/setup-targets.sh \
             tools/build-borders-animated.sh \
             configs/sketchybar/sketchybarrc \
             configs/sketchybar/plugins/*.sh
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Run unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
