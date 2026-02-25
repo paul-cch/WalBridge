@@ -131,4 +131,8 @@ def reload_all(scheme, config=None):
 
     # Yazi, Starship, OpenCode, HydroTodo — no hot-reload; applied on next launch/prompt
     for p in procs:
-        p.wait()
+        try:
+            p.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            log(f"Reload process {p.args[0]} timed out, killing")
+            p.kill()

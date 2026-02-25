@@ -329,14 +329,11 @@ if setWallpaper {
     for screen in NSScreen.screens {
         try? NSWorkspace.shared.setDesktopImageURL(newURL, for: screen, options: [:])
     }
-    let desktoppr = "/usr/local/bin/desktoppr"
-    if FileManager.default.fileExists(atPath: desktoppr) {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: desktoppr)
-        task.arguments = [imagePath]
-        try? task.run()
-        task.waitUntilExit()
-    }
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    task.arguments = ["desktoppr", imagePath]
+    try? task.run()
+    task.waitUntilExit()
 }
 
 // Step 4: animate the transition

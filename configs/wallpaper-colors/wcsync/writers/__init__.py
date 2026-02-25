@@ -46,7 +46,11 @@ def write_all(scheme, config=None):
             continue
         if mod in written:
             continue
-        mod.write(scheme, config)
+        try:
+            mod.write(scheme, config)
+        except Exception as e:
+            log(f"Writer {name} failed: {e}")
+            continue
         written.add(mod)
 
     log(

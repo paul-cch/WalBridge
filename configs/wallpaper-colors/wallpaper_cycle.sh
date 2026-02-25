@@ -8,6 +8,7 @@ set -euo pipefail
 
 WALLPAPER_DIR="$HOME/Pictures/wallpaper"
 STATE_DIR="$HOME/.config/wallpaper-colors"
+DESKTOPPR=$(command -v desktoppr 2>/dev/null || echo "/usr/local/bin/desktoppr")
 
 # Detect system appearance
 if defaults read -g AppleInterfaceStyle &>/dev/null; then
@@ -77,7 +78,7 @@ NEXT_WP="${ALL_FILES[$FILE_IDX]}"
 echo "$(( POS + 1 ))" > "$INDEX_FILE"
 
 # Set wallpaper
-/usr/local/bin/desktoppr "$NEXT_WP"
+"$DESKTOPPR" "$NEXT_WP"
 
 BASENAME=$(basename "$NEXT_WP")
 echo "[$(date +%H:%M:%S)] $THEME: $BASENAME ($(( POS + 1 ))/$COUNT)"

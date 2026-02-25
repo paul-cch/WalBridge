@@ -69,7 +69,10 @@ def extract_palette(img, n_colors=8):
     Expects a pre-resized image (200x200) for performance.
     """
     quantized = img.quantize(colors=n_colors, method=Image.Quantize.MEDIANCUT)
-    palette_data = quantized.getpalette()[: n_colors * 3]
+    raw_palette = quantized.getpalette()
+    if raw_palette is None:
+        return [(128, 128, 128)] * n_colors
+    palette_data = raw_palette[: n_colors * 3]
 
     colors = []
     for i in range(0, len(palette_data), 3):
