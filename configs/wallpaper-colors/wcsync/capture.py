@@ -7,13 +7,14 @@ fallback for dynamic/system wallpapers. Multi-monitor aware.
 import os
 import subprocess
 import time
+import shutil
 
 import Quartz
 from PIL import Image
 
 from .utils import log
 
-DESKTOPPR = "/usr/local/bin/desktoppr"
+DESKTOPPR = shutil.which("desktoppr") or "/usr/local/bin/desktoppr"
 
 # Window name patterns to search for wallpaper windows.
 # macOS has used different names across versions.
@@ -174,8 +175,8 @@ def load_wallpaper_from_file(wp_path):
     if wp_path and os.path.isfile(wp_path):
         try:
             return Image.open(wp_path).convert("RGB")
-        except Exception:
-            pass
+        except Exception as e:
+            log(f"Failed to load wallpaper from {wp_path}: {e}")
     return None
 
 

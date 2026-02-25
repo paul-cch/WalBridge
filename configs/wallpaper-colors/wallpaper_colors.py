@@ -18,6 +18,7 @@ Usage:
 import os
 import subprocess
 import sys
+import shutil
 
 from wcsync.capture import load_wallpaper
 from wcsync.colors import build_scheme, extract_palette, image_hash, sat, lum
@@ -28,7 +29,7 @@ from wcsync.writers import write_all
 
 CACHE_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_hash")
 LAST_WP_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_wp_path")
-DESKTOPPR = "/usr/local/bin/desktoppr"
+DESKTOPPR = shutil.which("desktoppr") or "/usr/local/bin/desktoppr"
 
 
 def main():

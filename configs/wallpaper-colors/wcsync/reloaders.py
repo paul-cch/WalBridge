@@ -3,16 +3,28 @@
 import glob
 import os
 import subprocess
+import shutil
 import tempfile
 
 from .config import Config
 from .utils import hexc, log
 
+def _find_bin(name):
+    """Locate binary on PATH, falling back to common Homebrew locations."""
+    path = shutil.which(name)
+    if path:
+        return path
+    for prefix in ("/opt/homebrew/bin", "/usr/local/bin"):
+        candidate = os.path.join(prefix, name)
+        if os.path.isfile(candidate):
+            return candidate
+    return name  # let subprocess raise a descriptive FileNotFoundError
+
 
 def reload_sketchybar():
     """Reload SketchyBar config. Returns Popen for parallel wait."""
     return subprocess.Popen(
-        ["/opt/homebrew/bin/sketchybar", "--reload"],
+        [_find_bin("sketchybar"), "--reload"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
@@ -27,7 +39,7 @@ def reload_kitty():
         procs.append(
             subprocess.Popen(
                 [
-                    "/opt/homebrew/bin/kitten",
+                    _find_bin("kitten"),
                     "@",
                     "--to",
                     f"unix:{sock}",
@@ -53,7 +65,7 @@ def reload_nvim():
         procs.append(
             subprocess.Popen(
                 [
-                    "/opt/homebrew/bin/nvim",
+                    _find_bin("nvim"),
                     "--server",
                     sock,
                     "--remote-expr",
@@ -81,7 +93,7 @@ def reload_borders(scheme, config=None):
     secondary = hexc(*scheme["border_secondary"], a=opacity)
     return subprocess.Popen(
         [
-            "/opt/homebrew/bin/borders",
+            _find_bin("borders"),
             "width=3.0",
             f"active_color=gradient(top_left={accent},bottom_right={secondary})",
         ],
