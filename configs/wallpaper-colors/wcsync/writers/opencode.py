@@ -35,7 +35,6 @@ def write(scheme, config=None):
 
     # Diff background tints
     add_bg = hex6(*darken(scheme["green"], 0.15))
-    change_bg = hex6(*darken(scheme["yellow"], 0.15))
     del_bg = hex6(*darken(scheme["red"], 0.15))
 
     theme = {

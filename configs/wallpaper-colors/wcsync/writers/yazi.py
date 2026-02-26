@@ -78,7 +78,6 @@ def write(scheme, config=None):
     yellow = hex6(*scheme["yellow"])
     purple = hex6(*scheme["purple"])
     cyan = hex6(*scheme["cyan"])
-    orange = hex6(*scheme["orange"])
     pink = hex6(*scheme["pink"])
     grey = hex6(*scheme["grey"])
     sel_bg = hex6(*scheme["item_bg"])

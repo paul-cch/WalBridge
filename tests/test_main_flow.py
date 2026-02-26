@@ -114,6 +114,7 @@ class MainFlowTests(unittest.TestCase):
             patch("wallpaper_colors.write_all", return_value=["kitty"]),
             patch("wallpaper_colors.reload_all") as reload_all_mock,
             patch("wallpaper_colors.atomic_write") as atomic_write_mock,
+            patch("wallpaper_colors.subprocess.run") as run_mock,
             patch("wallpaper_colors.sys.exit", side_effect=SystemExit(1)),
         ):
             with self.assertRaises(SystemExit):
@@ -121,6 +122,7 @@ class MainFlowTests(unittest.TestCase):
 
         atomic_write_mock.assert_not_called()
         reload_all_mock.assert_not_called()
+        run_mock.assert_called_once_with([wallpaper_colors.DESKTOPPR, "/tmp/wall.jpg"], capture_output=True)
 
 
 if __name__ == "__main__":
