@@ -8,6 +8,10 @@ set -euo pipefail
 #   bash install.sh --setup-targets         # Also wire tmux/btop/iTerm2 target setup
 
 detect_home() {
+    if [ -n "${WTS_INSTALL_HOME:-}" ]; then
+        printf '%s\n' "$WTS_INSTALL_HOME"
+        return
+    fi
     if command -v python3 >/dev/null 2>&1; then
         python3 -c 'import os,pwd; print(pwd.getpwuid(os.getuid()).pw_dir)'
     else
@@ -25,6 +29,7 @@ CONFIG_DIR="$REAL_HOME/.config/wallpaper-colors"
 BIN_DIR="$REAL_HOME/.local/bin"
 LAUNCH_DIR="$REAL_HOME/Library/LaunchAgents"
 CHECKSUM_DIR="$REPO_DIR/checksums"
+# Optional: packagers can call verify_sha256 for key files when CHECKSUM_DIR is populated.
 AGENT_PREFIX="${WALBRIDGE_AGENT_PREFIX:-${WTS_AGENT_PREFIX:-com.walbridge}}"
 UNINSTALL=false
 SETUP_TARGETS=false
@@ -120,21 +125,26 @@ verify_sha256() {
 }
 
 # ---------------------------------------------------------------------------
-# Dependency check
+# Dependency check (uses same interpreter as detect_python to avoid conflicts)
 # ---------------------------------------------------------------------------
 check_deps() {
-    local ok=true
+    local py ok=true
+    py="$(detect_python)"
 
-    if ! command -v python3 >/dev/null 2>&1; then
-        error "python3 not found"; ok=false
-    elif ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null; then
-        error "Python 3.11+ required (found $(python3 --version 2>&1))"; ok=false
+    if [ -z "$py" ] || [ "$py" = "python3" ]; then
+        command -v python3 >/dev/null 2>&1 || { error "python3 not found"; ok=false; }
+    fi
+    if [ -n "$py" ] && [ -x "$py" ]; then
+        "$py" -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null ||
+            { error "Python 3.11+ required (found $("$py" --version 2>&1))"; ok=false; }
+        "$py" -c "import PIL" 2>/dev/null    || { error "Pillow not installed (pip install Pillow)"; ok=false; }
+        "$py" -c "import Quartz" 2>/dev/null || { error "PyObjC not installed (pip install pyobjc-framework-Quartz)"; ok=false; }
+    else
+        error "No suitable Python with Pillow found"; ok=false
     fi
 
-    python3 -c "import PIL" 2>/dev/null    || { error "Pillow not installed (pip3 install Pillow)"; ok=false; }
-    python3 -c "import Quartz" 2>/dev/null  || { error "PyObjC not installed (pip3 install pyobjc-framework-Quartz)"; ok=false; }
-    command -v desktoppr >/dev/null 2>&1    || { error "desktoppr not found (brew install desktoppr)"; ok=false; }
-    command -v swiftc >/dev/null 2>&1       || { error "swiftc not found (install Xcode Command Line Tools)"; ok=false; }
+    command -v desktoppr >/dev/null 2>&1 || { error "desktoppr not found (brew install desktoppr)"; ok=false; }
+    command -v swiftc >/dev/null 2>&1      || { error "swiftc not found (install Xcode Command Line Tools)"; ok=false; }
 
     if [ "$ok" = false ]; then
         echo ""
@@ -220,6 +230,7 @@ install_agents() {
     info "Installing launchd agents (Python: $PYTHON)"
 
     mkdir -p "$LAUNCH_DIR"
+    mkdir -p "$REAL_HOME/.local/share/borders"
     for plist in "$REPO_DIR"/launchd/*.plist; do
         local name dest
         name=$(basename "$plist")

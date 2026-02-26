@@ -9,7 +9,17 @@ set -euo pipefail
 # Override with WALLPAPER_DIR to support non-default folder layouts.
 WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/wallpaper}"
 STATE_DIR="$HOME/.config/wallpaper-colors"
-DESKTOPPR=$(command -v desktoppr 2>/dev/null || echo "/usr/local/bin/desktoppr")
+# Prefer full paths to limit PATH hijack in launchd context
+if command -v desktoppr >/dev/null 2>&1; then
+    DESKTOPPR="$(command -v desktoppr)"
+elif [[ -x /opt/homebrew/bin/desktoppr ]]; then
+    DESKTOPPR="/opt/homebrew/bin/desktoppr"
+elif [[ -x /usr/local/bin/desktoppr ]]; then
+    DESKTOPPR="/usr/local/bin/desktoppr"
+else
+    echo "[$(date +%H:%M:%S)] desktoppr not found" >&2
+    exit 1
+fi
 
 # Detect system appearance
 if defaults read -g AppleInterfaceStyle &>/dev/null; then
@@ -41,11 +51,26 @@ if [[ $COUNT -eq 0 ]]; then
     exit 1
 fi
 
+# Atomic write (symlink-safe)
+atomic_write() {
+    local dest="$1"
+    local content="$2"
+    local dir tmp
+    dir="$(dirname "$dest")"
+    tmp="$(mktemp "$dir/.__wts_XXXXXX")"
+    printf '%s\n' "$content" > "$tmp"
+    mv -f "$tmp" "$dest"
+}
+
 # Generate shuffled order file
 reshuffle() {
-    # Use awk to shuffle indices (works on macOS without shuf/gshuf)
-    seq 0 $(( COUNT - 1 )) | awk 'BEGIN{srand()}{print rand()"\t"$0}' | sort -n | cut -f2 > "$ORDER_FILE"
-    echo 0 > "$INDEX_FILE"
+    local tmp_order tmp_idx
+    tmp_order="$(mktemp "$STATE_DIR/.__order_XXXXXX")"
+    tmp_idx="$(mktemp "$STATE_DIR/.__index_XXXXXX")"
+    seq 0 $(( COUNT - 1 )) | awk 'BEGIN{srand()}{print rand()"\t"$0}' | sort -n | cut -f2 > "$tmp_order"
+    mv -f "$tmp_order" "$ORDER_FILE"
+    printf '0' > "$tmp_idx"
+    mv -f "$tmp_idx" "$INDEX_FILE"
 }
 
 # Reshuffle if order file missing or file count changed
@@ -58,34 +83,57 @@ else
     fi
 fi
 
-# Read current position
+# Read current position (must be integer >= 0)
 POS=$(cat "$INDEX_FILE" 2>/dev/null || true)
 POS=${POS:-0}
+[[ "$POS" =~ ^[0-9]+$ ]] || POS=0
 
-# Read shuffled order into array
+# Read shuffled order into array; validate all entries are indices
 ORDER=()
 while IFS= read -r line; do
-    ORDER+=("$line")
+    [[ "$line" =~ ^[0-9]+$ ]] && (( line >= 0 && line < COUNT )) && ORDER+=("$line") || true
 done < "$ORDER_FILE"
 
-# Wrap around if we've gone through all wallpapers
-if [[ $POS -ge ${#ORDER[@]} ]]; then
+# If order is empty or position out of range, reshuffle and retry once
+if [[ ${#ORDER[@]} -eq 0 || $POS -ge ${#ORDER[@]} || $POS -lt 0 ]]; then
     reshuffle
     POS=0
     ORDER=()
     while IFS= read -r line; do
-        ORDER+=("$line")
+        [[ "$line" =~ ^[0-9]+$ ]] && (( line >= 0 && line < COUNT )) && ORDER+=("$line") || true
     done < "$ORDER_FILE"
 fi
 
-FILE_IDX=${ORDER[$POS]}
+# Defensive: if still empty (corrupted state), reshuffle and use 0
+if [[ ${#ORDER[@]} -eq 0 ]]; then
+    reshuffle
+    POS=0
+    ORDER=()
+    while IFS= read -r line; do
+        [[ "$line" =~ ^[0-9]+$ ]] && (( line >= 0 && line < COUNT )) && ORDER+=("$line") || true
+    done < "$ORDER_FILE"
+fi
+
+FILE_IDX=${ORDER[$POS]:--1}
+if [[ "$FILE_IDX" -lt 0 || "$FILE_IDX" -ge "$COUNT" ]]; then
+    echo "[$(date +%H:%M:%S)] Corrupted cycle state, reshuffling" >&2
+    reshuffle
+    POS=0
+    ORDER=()
+    while IFS= read -r line; do
+        [[ "$line" =~ ^[0-9]+$ ]] && (( line >= 0 && line < COUNT )) && ORDER+=("$line") || true
+    done < "$ORDER_FILE"
+    FILE_IDX=${ORDER[0]:--1}
+    [[ "$FILE_IDX" -ge 0 && "$FILE_IDX" -lt "$COUNT" ]] || { echo "[$(date +%H:%M:%S)] Reshuffle failed" >&2; exit 1; }
+fi
 NEXT_WP="${ALL_FILES[$FILE_IDX]}"
 
-# Advance position
-echo "$(( POS + 1 ))" > "$INDEX_FILE"
+# Advance position (atomic)
+atomic_write "$INDEX_FILE" "$(( POS + 1 ))"
 
-# Set wallpaper
+# Set wallpaper and record current path for display-change re-apply
 "$DESKTOPPR" "$NEXT_WP"
+atomic_write "$STATE_DIR/.current_wallpaper" "$NEXT_WP"
 
 BASENAME=$(basename "$NEXT_WP")
 echo "[$(date +%H:%M:%S)] $THEME: $BASENAME ($(( POS + 1 ))/$COUNT)"

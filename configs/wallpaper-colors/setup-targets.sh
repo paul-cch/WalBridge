@@ -76,11 +76,19 @@ USAGE
     done
 }
 
+# Escape path for tmux source-file: single-quote and escape any single quotes.
+# Prevents injection via newlines, backticks, or $ in path.
+tmux_safe_path() {
+    printf "'%s'" "${1//\'/\'\\\'\'}"
+}
+
 ensure_tmux_setup() {
     mkdir -p "$(dirname "$TMUX_CONF")"
     touch "$TMUX_CONF"
 
-    if grep -Fq "source-file $TMUX_THEME_PATH" "$TMUX_CONF"; then
+    local safe_path
+    safe_path="$(tmux_safe_path "$TMUX_THEME_PATH")"
+    if grep -Fq "source-file $TMUX_THEME_PATH" "$TMUX_CONF" || grep -Fq "source-file $safe_path" "$TMUX_CONF"; then
         info "tmux already wired: $TMUX_CONF"
         return
     fi
@@ -88,7 +96,7 @@ ensure_tmux_setup() {
     cat >>"$TMUX_CONF" <<EOF
 
 # >>> walbridge (auto-generated include)
-source-file $TMUX_THEME_PATH
+source-file $safe_path
 # <<< walbridge
 EOF
     info "Added tmux include to $TMUX_CONF"
