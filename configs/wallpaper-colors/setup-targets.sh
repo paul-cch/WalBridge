@@ -87,9 +87,9 @@ ensure_tmux_setup() {
 
     cat >>"$TMUX_CONF" <<EOF
 
-# >>> wallpaper-theme-sync (auto-generated include)
+# >>> walbridge (auto-generated include)
 source-file $TMUX_THEME_PATH
-# <<< wallpaper-theme-sync
+# <<< walbridge
 EOF
     info "Added tmux include to $TMUX_CONF"
 }
@@ -99,7 +99,7 @@ ensure_btop_setup() {
 
     if [ ! -f "$BTOP_CONF" ]; then
         cat >"$BTOP_CONF" <<EOF
-# btop config (created by wallpaper-theme-sync setup)
+# btop config (created by walbridge setup)
 color_theme = "$BTOP_THEME_NAME"
 EOF
         info "Created $BTOP_CONF with color_theme=\"$BTOP_THEME_NAME\""

@@ -1,6 +1,8 @@
-# Wallpaper Theme Sync
+# WalBridge
 
 Automatically syncs SketchyBar, JankyBorders, Kitty, WezTerm, Alacritty, Ghostty, iTerm2, tmux, btop, Neovim, Yazi, Starship, OpenCode, and HydroToDo colors to match the current macOS wallpaper — with animated transitions between wallpapers (fade, slide, wipe, grow), theme-aware wallpaper cycling, and multi-monitor support.
+
+Formerly: `wallpaper-theme-sync`.
 
 Inspired by Linux theming tools like `pywal`, `wallust`, `wpgtk`, and `Stylix` (NixOS), this project brings similar desktop ricing automation to macOS.
 
@@ -80,7 +82,7 @@ bash install.sh
 bash install.sh --setup-targets
 
 # Optional: customize launchd label prefix
-WTS_AGENT_PREFIX=com.yourname.wallpaper-sync bash install.sh
+WALBRIDGE_AGENT_PREFIX=com.yourname.wallpaper-sync bash install.sh
 ```
 
 ## Configuration
@@ -333,13 +335,13 @@ bash ~/.config/wallpaper-colors/wallpaper_cycle.sh
 
 | Agent | Purpose |
 |---|---|
-| `com.wallpaper-theme-sync.wallpaper-cycle` | Runs `wallpaper_cycle.sh` every 30 min + at login |
-| `com.wallpaper-theme-sync.wallpaper-colors` | Triggers `wallpaper_colors.py` via WatchPaths + 2-min poll |
-| `com.wallpaper-theme-sync.wallpaper-faded` | Persistent transition daemon (restart on crash, 10s throttle) |
-| `com.wallpaper-theme-sync.borders` | Runs `borders` (JankyBorders), restart on crash, 10s throttle |
-| `com.wallpaper-theme-sync.theme-watcher` | Polls dark/light mode changes and triggers cycle + sync (restart on crash) |
+| `com.walbridge.wallpaper-cycle` | Runs `wallpaper_cycle.sh` every 30 min + at login |
+| `com.walbridge.wallpaper-colors` | Triggers `wallpaper_colors.py` via WatchPaths + 2-min poll |
+| `com.walbridge.wallpaper-faded` | Persistent transition daemon (restart on crash, 10s throttle) |
+| `com.walbridge.borders` | Runs `borders` (JankyBorders), restart on crash, 10s throttle |
+| `com.walbridge.theme-watcher` | Polls dark/light mode changes and triggers cycle + sync (restart on crash) |
 
-`WTS_AGENT_PREFIX` can override `com.wallpaper-theme-sync` during install/uninstall.
+`WALBRIDGE_AGENT_PREFIX` can override `com.walbridge` during install/uninstall (`WTS_AGENT_PREFIX` is still accepted as a legacy alias).
 All agents are limited to the `Aqua` session type.
 
 ## File locations
@@ -347,7 +349,7 @@ All agents are limited to the `Aqua` session type.
 ### Project
 
 ```
-wallpaper-theme-sync/
+walbridge/
 ├── README.md
 ├── CODE_OF_CONDUCT.md
 ├── SECURITY.md
@@ -436,11 +438,11 @@ wallpaper-theme-sync/
 │       └── MacOS/wallpaper-fade
 
 ~/Library/LaunchAgents/
-├── com.wallpaper-theme-sync.wallpaper-cycle.plist
-├── com.wallpaper-theme-sync.wallpaper-colors.plist
-├── com.wallpaper-theme-sync.wallpaper-faded.plist
-├── com.wallpaper-theme-sync.borders.plist
-└── com.wallpaper-theme-sync.theme-watcher.plist
+├── com.walbridge.wallpaper-cycle.plist
+├── com.walbridge.wallpaper-colors.plist
+├── com.walbridge.wallpaper-faded.plist
+├── com.walbridge.borders.plist
+└── com.walbridge.theme-watcher.plist
 ```
 
 ## Usage

@@ -1,4 +1,4 @@
-# Contributing to Wallpaper Theme Sync
+# Contributing to WalBridge
 
 ## Quick Start
 

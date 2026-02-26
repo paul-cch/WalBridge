@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-# install.sh — Deploy wallpaper-theme-sync to your Mac.
+# install.sh — Deploy WalBridge to your Mac.
 #
 # Usage:
 #   bash install.sh                         # Install / update
@@ -25,7 +25,7 @@ CONFIG_DIR="$REAL_HOME/.config/wallpaper-colors"
 BIN_DIR="$REAL_HOME/.local/bin"
 LAUNCH_DIR="$REAL_HOME/Library/LaunchAgents"
 CHECKSUM_DIR="$REPO_DIR/checksums"
-AGENT_PREFIX="${WTS_AGENT_PREFIX:-com.wallpaper-theme-sync}"
+AGENT_PREFIX="${WALBRIDGE_AGENT_PREFIX:-${WTS_AGENT_PREFIX:-com.walbridge}}"
 UNINSTALL=false
 SETUP_TARGETS=false
 
@@ -43,7 +43,8 @@ Options:
   --uninstall                 Unload and remove launchd agents for current prefix
 
 Environment:
-  WTS_AGENT_PREFIX            launchd label/file prefix (default: com.wallpaper-theme-sync)
+  WALBRIDGE_AGENT_PREFIX      launchd label/file prefix (default: com.walbridge)
+  WTS_AGENT_PREFIX            legacy alias for WALBRIDGE_AGENT_PREFIX
 USAGE
 }
 
@@ -72,7 +73,7 @@ parse_args() {
 
 validate_agent_prefix() {
     if ! printf '%s' "$AGENT_PREFIX" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9.-]*$'; then
-        error "Invalid WTS_AGENT_PREFIX: $AGENT_PREFIX"
+        error "Invalid launchd prefix from WALBRIDGE_AGENT_PREFIX/WTS_AGENT_PREFIX: $AGENT_PREFIX"
         error "Allowed pattern: ^[A-Za-z0-9][A-Za-z0-9.-]*$"
         exit 1
     fi
@@ -302,7 +303,7 @@ validate_agent_prefix
 validate_home
 [ "$UNINSTALL" = true ] && uninstall
 
-echo "wallpaper-theme-sync installer"
+echo "WalBridge installer"
 echo "==============================="
 echo ""
 echo "Launchd prefix: $AGENT_PREFIX"
