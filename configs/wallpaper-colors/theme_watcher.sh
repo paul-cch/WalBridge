@@ -3,6 +3,8 @@ set -uo pipefail
 # theme_watcher.sh — Poll macOS appearance and trigger wallpaper switch when
 # dark/light mode changes. Runs as a persistent launchd daemon.
 # Poll interval 15s to limit wakeups; on change we run cycle then one sync.
+# Note: -e is intentionally omitted so the daemon loop survives individual
+# cycle or sync failures without exiting.
 
 STATE_DIR="$HOME/.config/wallpaper-colors"
 THEME_FILE="$STATE_DIR/.last_theme"

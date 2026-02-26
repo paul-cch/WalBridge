@@ -236,9 +236,9 @@ install_agents() {
         name=$(basename "$plist")
         dest=$(plist_dest_path "$name")
         sed \
-            -e "s|__HOME__|$REAL_HOME|g" \
-            -e "s|__PYTHON__|$PYTHON|g" \
-            -e "s|__AGENT_PREFIX__|$AGENT_PREFIX|g" \
+            -e "s@__HOME__@$REAL_HOME@g" \
+            -e "s@__PYTHON__@$PYTHON@g" \
+            -e "s@__AGENT_PREFIX__@$AGENT_PREFIX@g" \
             "$plist" > "$dest"
         info "  $(basename "$dest")"
     done

@@ -117,7 +117,7 @@ The `scheme` dict passed to all writers contains:
 | `accent` | `(r, g, b)` | Primary accent from wallpaper |
 | `secondary` | `(r, g, b)` | Most hue-distant palette color |
 | `border_accent` | `(r, g, b)` | Vivified accent for borders |
-| `border_secondary` | `(r, g, b)` | Vivified secondary for borders |
+| `border_inactive` | `(r, g, b)` | Muted accent for inactive borders |
 | `dark` | `(r, g, b)` | Darkest palette color |
 | `light` | `(r, g, b)` | Lightest palette color |
 | `bar_bg` | `(r, g, b)` | Bar background (= dark) |
