@@ -1,0 +1,199 @@
+:root {
+  --bg: #0f1724;
+  --bg-soft: #162237;
+  --panel: #1d2c45;
+  --text: #f2f6fc;
+  --muted: #b4c4d8;
+  --accent: #f08c5a;
+  --accent-2: #5fb7b0;
+  --line: #304666;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 80% -20%, #2f4c7a 0%, transparent 45%),
+    radial-gradient(circle at -10% 30%, #3d2f53 0%, transparent 35%),
+    linear-gradient(165deg, var(--bg) 0%, #101f33 55%, #121d2d 100%);
+  min-height: 100vh;
+}
+
+.nav,
+.hero-grid,
+.content,
+.footer {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0;
+}
+
+.brand {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.nav-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.hero {
+  padding-bottom: 1.75rem;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.kicker {
+  margin: 0 0 0.5rem;
+  color: var(--accent-2);
+  font-weight: 500;
+}
+
+h1 {
+  margin: 0;
+  line-height: 1.1;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.lead {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 1rem 0 1.25rem;
+  max-width: 58ch;
+}
+
+.cta-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.72rem 1rem;
+  border-radius: 0.7rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #ffb347);
+  color: #231209;
+}
+
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+}
+
+.terminal {
+  padding: 0.95rem;
+}
+
+.terminal-title {
+  margin: 0 0 0.6rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+pre {
+  margin: 0;
+  overflow-x: auto;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #dce5f0;
+}
+
+.content {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0 2rem;
+}
+
+.panel {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.chips span {
+  display: inline-block;
+  padding: 0.38rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding: 1rem 0 2rem;
+}
+
+.footer a {
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+}

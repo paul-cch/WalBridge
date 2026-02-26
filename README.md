@@ -6,6 +6,8 @@ Formerly: `wallpaper-theme-sync`.
 
 Inspired by Linux theming tools like `pywal`, `wallust`, `wpgtk`, and `Stylix` (NixOS), this project brings similar desktop ricing automation to macOS.
 
+Website: https://paul-cch.github.io/WalBridge/
+
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md) for project policies.
 
