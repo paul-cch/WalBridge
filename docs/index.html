@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WalBridge | macOS Wallpaper Theme Bridge</title>
+  <meta name="description" content="WalBridge syncs your macOS apps to your wallpaper colors with animated transitions and Linux-inspired theming workflows.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav">
+      <a class="brand" href="./">WalBridge</a>
+      <a class="nav-link" href="https://github.com/paul-cch/WalBridge" target="_blank" rel="noreferrer">GitHub</a>
+    </nav>
+    <div class="hero-grid">
+      <section>
+        <p class="kicker">Linux-inspired theming for macOS</p>
+        <h1>Bridge your wallpaper to your entire desktop stack.</h1>
+        <p class="lead">
+          WalBridge automatically syncs color themes across 14 apps from your current wallpaper, with vivid active borders, muted inactive borders, and smooth animated transitions.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/paul-cch/WalBridge/releases/latest" target="_blank" rel="noreferrer">Get Latest Release</a>
+          <a class="btn btn-ghost" href="https://github.com/paul-cch/WalBridge" target="_blank" rel="noreferrer">View Source</a>
+        </div>
+      </section>
+      <aside class="card terminal">
+        <p class="terminal-title">Quick Install</p>
+        <pre><code>git clone https://github.com/paul-cch/WalBridge.git
+cd WalBridge
+bash install.sh
+# optional setup for tmux/btop/iTerm2
+bash install.sh --setup-targets</code></pre>
+      </aside>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="panel">
+      <h2>Supported Targets</h2>
+      <div class="chips">
+        <span>SketchyBar</span><span>JankyBorders</span><span>Kitty</span><span>WezTerm</span><span>Alacritty</span><span>Ghostty</span><span>iTerm2</span><span>tmux</span><span>btop</span><span>Neovim</span><span>Yazi</span><span>Starship</span><span>OpenCode</span><span>HydroToDo</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>How It Works</h2>
+      <ol>
+        <li>Capture current wallpaper per display (with fallback for dynamic wallpapers).</li>
+        <li>Extract dominant palette and generate a coherent scheme.</li>
+        <li>Write target configs atomically, reload supported apps, and skip unchanged wallpapers via perceptual hash.</li>
+      </ol>
+    </section>
+
+    <section class="panel">
+      <h2>Release Demo</h2>
+      <p>See animated transitions and multi-target sync in action.</p>
+      <a class="btn btn-primary" href="https://github.com/paul-cch/WalBridge/releases/download/v1.0.0/walbridge-demo.gif" target="_blank" rel="noreferrer">Open Demo GIF</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Inspired by pywal, wallust, wpgtk, and Stylix.</p>
+    <p><a href="https://github.com/paul-cch/WalBridge/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a></p>
+  </footer>
+</body>
+</html>
