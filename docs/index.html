@@ -3,68 +3,204 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WalBridge | macOS Wallpaper Theme Bridge</title>
+  <title>WalBridge — macOS Wallpaper Theme Bridge</title>
   <meta name="description" content="WalBridge syncs your macOS apps to your wallpaper colors with animated transitions and Linux-inspired theming.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+  <nav class="nav">
+    <a class="brand" href="./">walbridge</a>
+    <div class="nav-links">
+      <a href="#docs">Docs</a>
+      <a href="https://github.com/paul-cch/WalBridge" target="_blank" rel="noreferrer">GitHub</a>
+    </div>
+  </nav>
+
   <header class="hero">
-    <nav class="nav">
-      <a class="brand" href="./">WalBridge</a>
-      <a class="nav-link" href="https://github.com/paul-cch/WalBridge" target="_blank" rel="noreferrer">GitHub</a>
-    </nav>
-    <div class="hero-grid">
-      <section>
-        <p class="kicker">Linux-inspired theming for macOS</p>
-        <h1>Bridge your wallpaper to your entire desktop stack.</h1>
-        <p class="lead">
-          WalBridge automatically syncs color themes across 14 apps from your current wallpaper, with high-contrast active borders, dimmed inactive borders, and animated transitions.
-        </p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="https://github.com/paul-cch/WalBridge/releases/latest" target="_blank" rel="noreferrer">Get Latest Release</a>
-          <a class="btn btn-ghost" href="https://github.com/paul-cch/WalBridge" target="_blank" rel="noreferrer">View Source</a>
-        </div>
-      </section>
-      <aside class="card terminal">
-        <p class="terminal-title">Quick Install</p>
-        <pre><code>git clone https://github.com/paul-cch/WalBridge.git
-cd WalBridge
-bash install.sh
-# optional setup for tmux/btop/iTerm2
-bash install.sh --setup-targets</code></pre>
-      </aside>
+    <h1>walbridge</h1>
+    <p class="tagline">Bridge your wallpaper to your entire desktop stack.</p>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+      </div>
+      <pre><code><span class="prompt">$</span> git clone https://github.com/paul-cch/WalBridge.git
+<span class="prompt">$</span> cd WalBridge
+<span class="prompt">$</span> bash install.sh
+<span class="prompt">$</span> bash install.sh --setup-targets  <span class="comment"># tmux/btop/iTerm2</span></code></pre>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/paul-cch/WalBridge/releases/latest" target="_blank" rel="noreferrer">Get Release</a>
+      <a class="btn btn-ghost" href="https://github.com/paul-cch/WalBridge" target="_blank" rel="noreferrer">View Source</a>
+    </div>
+
+    <div class="swatch">
+      <span style="--hue: 24"></span>
+      <span style="--hue: 45"></span>
+      <span style="--hue: 174"></span>
+      <span style="--hue: 210"></span>
+      <span style="--hue: 270"></span>
+      <span style="--hue: 340"></span>
+      <span style="--hue: 120"></span>
+      <span style="--hue: 55"></span>
+    </div>
+
+    <div class="screenshot-placeholder">screenshot coming soon</div>
+
+    <p class="targets-inline">
+      SketchyBar · JankyBorders · Kitty · WezTerm · Alacritty · Ghostty · iTerm2 · tmux · btop · Neovim · Yazi · Starship · OpenCode · HydroToDo
+    </p>
+
+    <div class="scroll-hint">
+      <span>docs</span>
+      <span>↓</span>
     </div>
   </header>
 
-  <main class="content">
-    <section class="panel">
-      <h2>Supported Targets</h2>
-      <div class="chips">
-        <span>SketchyBar</span><span>JankyBorders</span><span>Kitty</span><span>WezTerm</span><span>Alacritty</span><span>Ghostty</span><span>iTerm2</span><span>tmux</span><span>btop</span><span>Neovim</span><span>Yazi</span><span>Starship</span><span>OpenCode</span><span>HydroToDo</span>
-      </div>
-    </section>
+  <main id="docs" class="docs">
+    <nav class="docs-nav">
+      <a href="#how-it-works">How it works</a>
+      <a href="#configuration">Configuration</a>
+      <a href="#targets">Targets</a>
+      <a href="#transitions">Transitions</a>
+      <a href="#performance">Performance</a>
+    </nav>
 
-    <section class="panel">
-      <h2>How It Works</h2>
+    <section id="how-it-works">
+      <h2>How it works</h2>
+      <pre class="diagram"><code>┌─────────────────────┐
+│  wallpaper_cycle.sh  │  Timer (every 30 min)
+│  dark/ or light/     │  Picks folder based on system appearance
+└────────┬────────────┘
+         │ desktoppr
+         ▼
+┌─────────────────────┐                           ┌──────────────────┐
+│  wallpaper-faded     │                           │  colors.sh       │──▶ SketchyBar
+│  (Swift daemon)      │                           │  border_colors   │──▶ JankyBorders
+│  animated transitions│     ┌────────────────┐    │  wallpaper.conf  │──▶ Kitty
+└─────────────────────┘     │ wallpaper_colors│───▶│  wallpaper.toml  │──▶ WezTerm
+                            │ .py + wcsync/   │    │  wallpaper.toml  │──▶ Alacritty
+  WatchPaths trigger ──────▶│                 │    │  wallpaper.conf  │──▶ Ghostty
+                            │                 │    │  wallpaper.itermcolors │──▶ iTerm2
+                            │                 │    │  wallpaper.conf  │──▶ tmux
+                            │                 │    │  wallpaper.theme │──▶ btop
+                            └────────────────┘    │  nvim_colors.lua │──▶ Neovim
+                                                  │  flavor.toml     │──▶ Yazi
+                                                  │  starship.toml   │──▶ Starship
+                                                  │  wallpaper.json  │──▶ OpenCode
+                                                  │  hydrotodo.json  │──▶ HydroToDo
+                                                  └──────────────────┘</code></pre>
       <ol>
-        <li>Capture current wallpaper per display (with fallback for dynamic wallpapers).</li>
-        <li>Extract dominant palette and generate a coherent scheme.</li>
-        <li>Write target configs atomically, reload supported apps, and skip unchanged wallpapers via perceptual hash.</li>
+        <li>Capture the current wallpaper per display, with fallback for dynamic wallpapers.</li>
+        <li>Extract the dominant palette (median-cut quantization, default 8 colors) and generate a coherent color scheme.</li>
+        <li>Write target configs atomically, reload supported apps, and skip unchanged wallpapers via perceptual hash (~370ms).</li>
       </ol>
     </section>
 
-    <section class="panel">
-      <h2>Release Demo</h2>
-      <a class="btn btn-primary" href="https://github.com/paul-cch/WalBridge/releases/download/v1.0.0/walbridge-demo.gif" target="_blank" rel="noreferrer">Open Demo GIF</a>
+    <section id="configuration">
+      <h2>Configuration</h2>
+      <p>All options live in <code>~/.config/wallpaper-colors/config.toml</code>. The file is optional — defaults are used when absent.</p>
+      <pre><code>[general]
+display = 1           # Which display to extract from
+n_colors = 8          # Palette size for quantization
+
+[scheme]
+min_saturation = 0.45 # Accent color saturation floor
+min_value = 0.55      # Accent color brightness floor
+# accent_override = "#3a7bd5"  # Skip auto-detection
+
+[borders]
+vivify_sat = 0.65     # Border color saturation floor
+vivify_val = 0.85     # Border color brightness floor
+opacity = 179         # Active border opacity (0-255)
+inactive_opacity = 102
+
+[targets]              # Enable/disable individual apps
+sketchybar = true
+borders = true
+kitty = true
+wezterm = true
+alacritty = true
+ghostty = true
+iterm2 = true
+tmux = true
+btop = true
+neovim = true
+yazi = true
+starship = true
+opencode = true
+hydrotodo = true</code></pre>
+    </section>
+
+    <section id="targets">
+      <h2>Targets</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>App</th><th>Config generated</th><th>Reload</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SketchyBar</td><td>~/.config/sketchybar/colors.sh</td><td>sketchybar --reload</td></tr>
+            <tr><td>JankyBorders</td><td>~/.config/wallpaper-colors/border_colors</td><td>IPC via borders binary</td></tr>
+            <tr><td>Kitty</td><td>~/.config/kitty/themes/wallpaper.conf</td><td>kitten @ set-colors</td></tr>
+            <tr><td>WezTerm</td><td>~/.config/wezterm/colors/wallpaper.toml</td><td>Config reload</td></tr>
+            <tr><td>Alacritty</td><td>~/.config/alacritty/themes/wallpaper.toml</td><td>Config reload</td></tr>
+            <tr><td>Ghostty</td><td>~/.config/ghostty/themes/wallpaper.conf</td><td>Config reload/restart</td></tr>
+            <tr><td>iTerm2</td><td>~/.config/iterm2/colors/wallpaper.itermcolors</td><td>One-time preset import</td></tr>
+            <tr><td>tmux</td><td>~/.config/tmux/themes/wallpaper.conf</td><td>Auto source-file</td></tr>
+            <tr><td>btop</td><td>~/.config/btop/themes/wallpaper.theme</td><td>Set color_theme=wallpaper</td></tr>
+            <tr><td>Neovim</td><td>~/.config/wallpaper-colors/nvim_colors.lua</td><td>nvim --remote-send</td></tr>
+            <tr><td>Yazi</td><td>~/.config/yazi/flavors/wallpaper.yazi/flavor.toml</td><td>On launch</td></tr>
+            <tr><td>Starship</td><td>~/.config/starship.toml</td><td>On next prompt</td></tr>
+            <tr><td>OpenCode</td><td>~/.config/opencode/themes/wallpaper.json</td><td>On launch</td></tr>
+            <tr><td>HydroToDo</td><td>~/.config/wallpaper-colors/hydrotodo_colors.json</td><td>File watch</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="transitions">
+      <h2>Transitions</h2>
+      <p>The wallpaper-faded daemon keeps a persistent overlay window. When the wallpaper changes, a random animation reveals the new image — zero flash.</p>
+      <table>
+        <thead>
+          <tr><th>Transition</th><th>Effect</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>fade</td><td>Crossfade to new wallpaper</td></tr>
+          <tr><td>slide-*</td><td>Slide the old wallpaper off screen (left/right/up/down)</td></tr>
+          <tr><td>wipe-*</td><td>Directional wipe revealing new wallpaper</td></tr>
+          <tr><td>grow</td><td>Old wallpaper scales up and fades out</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="performance">
+      <h2>Performance</h2>
+      <table>
+        <thead>
+          <tr><th>Metric</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Full color sync</td><td>~1s</td></tr>
+          <tr><td>No-change skip (hash match)</td><td>~370ms</td></tr>
+          <tr><td>Transition animation</td><td>700ms</td></tr>
+          <tr><td>Transition detection latency</td><td>~100ms</td></tr>
+          <tr><td>CPU at idle (daemon + poll)</td><td>negligible</td></tr>
+        </tbody>
+      </table>
     </section>
   </main>
 
   <footer class="footer">
-    <p>Inspired by pywal, wallust, wpgtk, and Stylix.</p>
-    <p><a href="https://github.com/paul-cch/WalBridge/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a></p>
+    <span>Inspired by pywal, wallust, wpgtk, and Stylix.</span>
+    <a href="https://github.com/paul-cch/WalBridge/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
   </footer>
 </body>
 </html>
