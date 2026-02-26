@@ -47,16 +47,16 @@ def main():
     if verbose:
         log(f"Loaded wallpaper: {img.size[0]}x{img.size[1]} ({wp_path or 'capture'})")
 
-    # Resize once for all downstream processing
-    small = img.resize((200, 200), Image.Resampling.LANCZOS)
-
     # 2. Check if wallpaper actually changed (skip if identical)
-    current_hash = image_hash(small)
+    current_hash = image_hash(img)
     if not force and os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, "r") as f:
             if f.read().strip() == current_hash:
                 log("Unchanged, skipping")
                 return
+
+    # Resize once for downstream palette extraction
+    small = img.resize((200, 200), Image.Resampling.LANCZOS)
 
     # 2b. Propagate wallpaper to all spaces (fixes Unsplash per-space bug)
     if wp_path:
@@ -80,7 +80,10 @@ def main():
         print(f"Light:     {hexc(*scheme['light'])}")
 
     # 4. Write configs
-    write_all(scheme, config)
+    failed_writers = write_all(scheme, config)
+    if failed_writers:
+        log(f"ERROR: writer failures ({', '.join(sorted(failed_writers))}); not caching")
+        sys.exit(1)
 
     # 5. Save hash + wallpaper path
     atomic_write(CACHE_FILE, current_hash)
@@ -91,8 +94,9 @@ def main():
     reload_all(scheme, config)
 
     ba = hexc(*scheme["border_accent"])
-    bs = hexc(*scheme["border_secondary"])
-    log(f"Synced: border={ba}→{bs} bar_accent={hexc(*scheme['accent'])}")
+    bi_rgb = scheme.get("border_inactive") or scheme.get("grey", scheme["border_accent"])
+    bi = hexc(*bi_rgb)
+    log(f"Synced: border={ba} inactive={bi} bar_accent={hexc(*scheme['accent'])}")
 
 
 if __name__ == "__main__":

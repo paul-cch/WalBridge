@@ -16,7 +16,7 @@ Please do not report security vulnerabilities in public GitHub issues.
 Use one of these private channels:
 
 1. GitHub private vulnerability reporting (preferred, if enabled).
-2. Private contact via the maintainer's GitHub profile.
+2. Private contact via the maintainer profile: https://github.com/paulcouach
 
 Please include:
 

@@ -2,18 +2,26 @@
 
 import os
 
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, safe_home_path, sanitize_name
 
 DEFAULT_SCHEME_NAME = "wallpaper"
 
 
 def _scheme_name():
-    return os.environ.get("WALLPAPER_WEZTERM_SCHEME_NAME", DEFAULT_SCHEME_NAME)
+    return sanitize_name(
+        os.environ.get("WALLPAPER_WEZTERM_SCHEME_NAME"),
+        DEFAULT_SCHEME_NAME,
+        "WALLPAPER_WEZTERM_SCHEME_NAME",
+    )
 
 
 def _output_path():
     default_path = f"~/.config/wezterm/colors/{_scheme_name()}.toml"
-    return os.path.expanduser(os.environ.get("WALLPAPER_WEZTERM_OUTPUT_PATH", default_path))
+    return safe_home_path(
+        os.environ.get("WALLPAPER_WEZTERM_OUTPUT_PATH"),
+        default_path,
+        "WALLPAPER_WEZTERM_OUTPUT_PATH",
+    )
 
 
 def write(scheme, config=None):

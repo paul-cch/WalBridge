@@ -6,8 +6,30 @@ set -uo pipefail
 STATE_DIR="$HOME/.config/wallpaper-colors"
 THEME_FILE="$STATE_DIR/.last_theme"
 CYCLE_SCRIPT="$HOME/.config/wallpaper-colors/wallpaper_cycle.sh"
-PYTHON="${WALLPAPER_PYTHON:-$(command -v python3 || true)}"
 COLORS_SCRIPT="$HOME/.config/wallpaper-colors/wallpaper_colors.py"
+
+resolve_python_bin() {
+    local raw="${WALLPAPER_PYTHON:-}"
+    local candidate=""
+
+    if [[ -n "$raw" ]]; then
+        if [[ "$raw" == */* ]]; then
+            candidate="$raw"
+        elif command -v "$raw" >/dev/null 2>&1; then
+            candidate="$(command -v "$raw")"
+        fi
+
+        if [[ -n "$candidate" && -x "$candidate" && "$(basename "$candidate")" == python* ]]; then
+            printf '%s\n' "$candidate"
+            return
+        fi
+        echo "[$(date +%H:%M:%S)] WARN: ignoring invalid WALLPAPER_PYTHON=$raw" >&2
+    fi
+
+    command -v python3 || true
+}
+
+PYTHON="$(resolve_python_bin)"
 
 mkdir -p "$STATE_DIR"
 

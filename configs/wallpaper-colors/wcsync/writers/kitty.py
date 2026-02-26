@@ -3,9 +3,21 @@
 import os
 
 from ..colors import darken, lighten
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, safe_home_path
 
-OUTPUT_PATH = os.path.expanduser("~/.config/kitty/themes/wallpaper.conf")
+DEFAULT_OUTPUT_PATH = "~/.config/kitty/themes/wallpaper.conf"
+
+
+def _output_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_KITTY_OUTPUT_PATH"),
+        DEFAULT_OUTPUT_PATH,
+        "WALLPAPER_KITTY_OUTPUT_PATH",
+    )
+
+
+def output_path():
+    return _output_path()
 
 
 def write(scheme, config=None):
@@ -49,4 +61,4 @@ active_tab_background   {hex6(*sel_bg)}
 inactive_tab_foreground {hex6(*scheme["grey"])}
 inactive_tab_background {hex6(*darken(bg, 0.7))}
 """
-    atomic_write(OUTPUT_PATH, content)
+    atomic_write(_output_path(), content)

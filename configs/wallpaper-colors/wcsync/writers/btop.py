@@ -2,18 +2,26 @@
 
 import os
 
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, safe_home_path, sanitize_name
 
 DEFAULT_THEME_NAME = "wallpaper"
 
 
 def _theme_name():
-    return os.environ.get("WALLPAPER_BTOP_THEME_NAME", DEFAULT_THEME_NAME)
+    return sanitize_name(
+        os.environ.get("WALLPAPER_BTOP_THEME_NAME"),
+        DEFAULT_THEME_NAME,
+        "WALLPAPER_BTOP_THEME_NAME",
+    )
 
 
 def _output_path():
     default_path = f"~/.config/btop/themes/{_theme_name()}.theme"
-    return os.path.expanduser(os.environ.get("WALLPAPER_BTOP_OUTPUT_PATH", default_path))
+    return safe_home_path(
+        os.environ.get("WALLPAPER_BTOP_OUTPUT_PATH"),
+        default_path,
+        "WALLPAPER_BTOP_OUTPUT_PATH",
+    )
 
 
 def write(scheme, config=None):

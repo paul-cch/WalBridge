@@ -1,5 +1,7 @@
 """Writer registry — dispatches write_all to individual target writers."""
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from ..config import Config
 from ..utils import log
 
@@ -32,7 +34,6 @@ _WRITERS = {
     "tmux": tmux,
     "btop": btop,
     "neovim": neovim,
-    "lualine": neovim,  # lualine is part of the neovim target toggle
     "yazi": yazi,
     "starship": starship,
     "opencode": opencode,
@@ -48,21 +49,24 @@ def write_all(scheme, config=None):
     if config is None:
         config = Config()
 
+    enabled = [(name, mod) for name, mod in _WRITERS.items() if config.targets.get(name, True)]
     written = set()
-    for name, mod in _WRITERS.items():
-        # lualine follows the neovim toggle
-        toggle_key = "neovim" if name == "lualine" else name
-        if not config.targets.get(toggle_key, True):
-            continue
-        if mod in written:
-            continue
-        try:
-            mod.write(scheme, config)
-        except Exception as e:
-            log(f"Writer {name} failed: {e}")
-            continue
-        written.add(mod)
+    failed = []
+
+    if enabled:
+        with ThreadPoolExecutor(max_workers=min(8, len(enabled))) as pool:
+            futures = {pool.submit(mod.write, scheme, config): (name, mod) for name, mod in enabled}
+            for fut in as_completed(futures):
+                name, mod = futures[fut]
+                try:
+                    fut.result()
+                except Exception as e:
+                    log(f"Writer {name} failed: {e}")
+                    failed.append(name)
+                    continue
+                written.add(mod)
 
     log(
         f"Wrote configs for: {', '.join(sorted(m.__name__.rsplit('.', 1)[-1] for m in written))}"
     )
+    return failed

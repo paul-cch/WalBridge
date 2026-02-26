@@ -14,7 +14,33 @@ set -euo pipefail
 # Works standalone or as a Raycast Script Command.
 
 SCRIPT_DIR="$HOME/.config/wallpaper-colors"
-PYTHON="${WALLPAPER_PYTHON:-$(command -v python3)}"
+
+resolve_python_bin() {
+    local raw="${WALLPAPER_PYTHON:-}"
+    local candidate=""
+
+    if [[ -n "$raw" ]]; then
+        if [[ "$raw" == */* ]]; then
+            candidate="$raw"
+        elif command -v "$raw" >/dev/null 2>&1; then
+            candidate="$(command -v "$raw")"
+        fi
+
+        if [[ -n "$candidate" && -x "$candidate" && "$(basename "$candidate")" == python* ]]; then
+            printf '%s\n' "$candidate"
+            return
+        fi
+        echo "WARN: ignoring invalid WALLPAPER_PYTHON=$raw" >&2
+    fi
+
+    command -v python3 || true
+}
+
+PYTHON="$(resolve_python_bin)"
+if [[ -z "$PYTHON" ]]; then
+    echo "ERROR: python3 not found" >&2
+    exit 1
+fi
 
 bash "$SCRIPT_DIR/wallpaper_cycle.sh"
 sleep 0.5

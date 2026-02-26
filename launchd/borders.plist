@@ -7,19 +7,18 @@
 		<key>LANG</key>
 		<string>en_US.UTF-8</string>
 		<key>PATH</key>
-		<string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
 		</dict>
 	<key>KeepAlive</key>
-	<true/>
+	<dict>
+		<key>SuccessfulExit</key>
+		<false/>
+	</dict>
 	<key>Label</key>
-	<string>__AGENT_PREFIX__.borders-animated</string>
+	<string>__AGENT_PREFIX__.borders</string>
 	<key>LimitLoadToSessionType</key>
 	<array>
 		<string>Aqua</string>
-		<string>Background</string>
-		<string>LoginWindow</string>
-		<string>StandardIO</string>
-		<string>System</string>
 	</array>
 	<key>ProcessType</key>
 	<string>Interactive</string>
@@ -30,6 +29,8 @@
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
 	<key>StandardErrorPath</key>
 	<string>__HOME__/.local/share/borders/borders.err.log</string>
 	<key>StandardOutPath</key>

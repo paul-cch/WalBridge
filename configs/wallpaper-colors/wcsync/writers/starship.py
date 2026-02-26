@@ -2,9 +2,26 @@
 
 import os
 
-from ..utils import atomic_write, hex6, log
+from ..utils import atomic_write, hex6, log, safe_home_path
 
-OUTPUT_PATH = os.path.expanduser("~/.config/starship.toml")
+DEFAULT_OUTPUT_PATH = "~/.config/starship.toml"
+DEFAULT_FALLBACK_PATH = "~/.config/wallpaper-colors/starship.toml"
+
+
+def _output_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_STARSHIP_OUTPUT_PATH"),
+        DEFAULT_OUTPUT_PATH,
+        "WALLPAPER_STARSHIP_OUTPUT_PATH",
+    )
+
+
+def _fallback_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_STARSHIP_FALLBACK_PATH"),
+        DEFAULT_FALLBACK_PATH,
+        "WALLPAPER_STARSHIP_FALLBACK_PATH",
+    )
 
 
 def write(scheme, config=None):
@@ -46,14 +63,15 @@ renamed = ""
 deleted = ""
 """
     # Don't overwrite user's custom starship config
-    if os.path.isfile(OUTPUT_PATH):
+    target = _output_path()
+    if os.path.isfile(target):
         try:
-            with open(OUTPUT_PATH, "r") as f:
+            with open(target, "r", encoding="utf-8") as f:
                 if "Auto-generated from wallpaper" not in f.readline():
-                    alt = os.path.expanduser("~/.config/wallpaper-colors/starship.toml")
+                    alt = _fallback_path()
                     atomic_write(alt, content)
                     log(f"Starship: user config detected, wrote to {alt}")
                     return
         except OSError:
             pass
-    atomic_write(OUTPUT_PATH, content)
+    atomic_write(target, content)

@@ -12,7 +12,7 @@ jobs:
   shell-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Shell syntax check
         run: |
@@ -22,19 +22,113 @@ jobs:
             configs/wallpaper-colors/borders-cycle.sh \
             configs/wallpaper-colors/next-wallpaper.sh \
             configs/wallpaper-colors/setup-targets.sh \
-            tools/build-borders-animated.sh \
             configs/sketchybar/sketchybarrc \
             configs/sketchybar/plugins/*.sh
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck
+        run: |
+          shellcheck -S error install.sh \
+            configs/wallpaper-colors/theme_watcher.sh \
+            configs/wallpaper-colors/wallpaper_cycle.sh \
+            configs/wallpaper-colors/borders-cycle.sh \
+            configs/wallpaper-colors/next-wallpaper.sh \
+            configs/wallpaper-colors/setup-targets.sh \
+            configs/sketchybar/sketchybarrc \
+            configs/sketchybar/plugins/*.sh
+
+  python-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69b4b4095f27b00af7ddff04731be393a53 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Install ruff
+        run: python -m pip install --upgrade pip ruff
+
+      - name: Run ruff
+        run: |
+          ruff check --select F \
+            configs/wallpaper-colors/wcsync \
+            configs/wallpaper-colors/wallpaper_colors.py \
+            tests
 
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69b4b4095f27b00af7ddff04731be393a53 # v5.6.0
         with:
           python-version: '3.11'
 
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip -r requirements.txt
+
       - name: Run unit tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
+
+  cli-flow-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69b4b4095f27b00af7ddff04731be393a53 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip -r requirements.txt
+
+      - name: Run CLI flow tests
+        run: python -m unittest discover -s tests -p 'test_main_flow.py' -v
+
+  macos-validation:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69b4b4095f27b00af7ddff04731be393a53 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip -r requirements.txt
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Verify macOS Quartz runtime
+        run: |
+          python -c "import Quartz"
+          PYTHONPATH=configs/wallpaper-colors python -c "from wcsync.capture import get_display_count; assert get_display_count() >= 0"
+
+      - name: Swift compile check
+        run: |
+          mkdir -p /tmp/clang-module-cache /tmp/swift-module-cache /tmp/wts-build
+          CLANG_MODULE_CACHE_PATH=/tmp/clang-module-cache \
+          SWIFT_MODULECACHE_PATH=/tmp/swift-module-cache \
+          swiftc -O tools/wallpaper-fade.swift \
+            -o /tmp/wts-build/wallpaper-fade \
+            -framework AppKit -framework QuartzCore -framework ScreenCaptureKit
+          CLANG_MODULE_CACHE_PATH=/tmp/clang-module-cache \
+          SWIFT_MODULECACHE_PATH=/tmp/swift-module-cache \
+          swiftc -O tools/wallpaper-faded.swift \
+            -o /tmp/wts-build/wallpaper-faded \
+            -framework AppKit -framework QuartzCore

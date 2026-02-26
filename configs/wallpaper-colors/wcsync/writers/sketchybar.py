@@ -2,9 +2,17 @@
 
 import os
 
-from ..utils import atomic_write, hexc
+from ..utils import atomic_write, hexc, safe_home_path
 
-OUTPUT_PATH = os.path.expanduser("~/.config/sketchybar/colors.sh")
+DEFAULT_OUTPUT_PATH = "~/.config/sketchybar/colors.sh"
+
+
+def _output_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_SKETCHYBAR_OUTPUT_PATH"),
+        DEFAULT_OUTPUT_PATH,
+        "WALLPAPER_SKETCHYBAR_OUTPUT_PATH",
+    )
 
 
 def write(scheme, config=None):
@@ -32,4 +40,4 @@ export ACCENT_COLOR=$BLUE
 export ACTIVE_COLOR=$BLUE
 export BLUE_VIVID={hexc(*scheme["border_accent"])}
 """
-    atomic_write(OUTPUT_PATH, content)
+    atomic_write(_output_path(), content)

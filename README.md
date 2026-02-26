@@ -79,9 +79,6 @@ bash install.sh
 # Optional: one-time setup for tmux/btop/iTerm2 integration
 bash install.sh --setup-targets
 
-# Optional: install prebuilt borders-animated binary (checksum verified)
-bash install.sh --install-prebuilt-borders
-
 # Optional: customize launchd label prefix
 WTS_AGENT_PREFIX=com.yourname.wallpaper-sync bash install.sh
 ```
@@ -104,9 +101,10 @@ harmonize_factor = 0.25  # Named color hue shift toward accent (0–1)
 # accent_override = "#3a7bd5"  # Skip auto-detection, use this color
 
 [borders]
-vivify_sat = 0.45     # Border color saturation floor
-vivify_val = 0.65     # Border color brightness floor
-opacity = 179         # Border opacity (0–255)
+vivify_sat = 0.65     # Border color saturation floor (higher = more pop)
+vivify_val = 0.85     # Border color brightness floor (higher = more pop)
+opacity = 179         # Active border opacity (0–255)
+inactive_opacity = 102 # Inactive border opacity (0–255)
 
 [targets]              # Enable/disable individual apps
 sketchybar = true
@@ -215,29 +213,9 @@ wallpaper-fade ~/Pictures/wallpaper/photo.jpg
 wallpaper-fade --from ~/Pictures/wallpaper/old.jpg
 ```
 
-### `borders-animated`
+### JankyBorders
 
-Pre-built custom fork of [JankyBorders](https://github.com/FelixKratz/JankyBorders) that adds animated gradient border support. The included binary is a **Mach-O arm64 executable** — Apple Silicon only (no x86_64 support).
-
-**Provenance**: Forked from FelixKratz/JankyBorders with a single addition: `gradient()` support in the `active_color` parameter. The fork patches the border rendering to interpolate between two colors diagonally. The upstream project does not support gradients.
-
-**Gradient syntax**:
-```
-active_color=gradient(top_left=0xffCOLOR1,bottom_right=0xffCOLOR2)
-```
-
-**IPC**: Live color updates use the homebrew `borders` binary for IPC — both share the same mach bootstrap port (`borders`), so the lightweight homebrew binary can send gradient config to the running `borders-animated` process without spawning a heavyweight duplicate.
-
-**Install behavior**:
-- `install.sh` skips the checked-in binary by default.
-- To install it, run `bash install.sh --install-prebuilt-borders`.
-- Installer validates `checksums/borders-animated.sha256` before copying.
-- You can build from source with `bash tools/build-borders-animated.sh` (details: [`docs/borders-animated-build.md`](docs/borders-animated-build.md)).
-
-**Limitations**:
-- arm64 only (Apple Silicon). No universal binary or x86_64 build.
-- No CI build attestation yet for the gradient-enabled forked binary.
-- Upstream JankyBorders changes must be manually cherry-picked into the fork.
+[JankyBorders](https://github.com/FelixKratz/JankyBorders) (`brew install borders`) draws vivid active borders plus muted inactive borders derived from the wallpaper palette, updated live via IPC whenever the wallpaper changes.
 
 ### Target apps
 
@@ -308,7 +286,8 @@ export WALLPAPER_BTOP_THEME_NAME="wallpaper"
 
 # Borders writer + borders-cycle.sh
 export WALLPAPER_BORDER_COLORS_FILE="$HOME/.config/wallpaper-colors/border_colors"
-export WALLPAPER_BORDERS_BIN="$HOME/.local/bin/borders-animated"
+# Optional: override path to borders binary (default: 'borders' from PATH)
+# export WALLPAPER_BORDERS_BIN="/opt/homebrew/bin/borders"
 
 # Yazi writer
 export WALLPAPER_YAZI_FLAVOR_NAME="wallpaper"
@@ -356,11 +335,12 @@ bash ~/.config/wallpaper-colors/wallpaper_cycle.sh
 |---|---|
 | `com.wallpaper-theme-sync.wallpaper-cycle` | Runs `wallpaper_cycle.sh` every 30 min + at login |
 | `com.wallpaper-theme-sync.wallpaper-colors` | Triggers `wallpaper_colors.py` via WatchPaths + 2-min poll |
-| `com.wallpaper-theme-sync.wallpaper-faded` | Persistent transition daemon (`KeepAlive`) |
-| `com.wallpaper-theme-sync.borders-animated` | Runs `borders-animated` with `KeepAlive` |
-| `com.wallpaper-theme-sync.theme-watcher` | Polls dark/light mode changes and triggers cycle + sync |
+| `com.wallpaper-theme-sync.wallpaper-faded` | Persistent transition daemon (restart on crash, 10s throttle) |
+| `com.wallpaper-theme-sync.borders` | Runs `borders` (JankyBorders), restart on crash, 10s throttle |
+| `com.wallpaper-theme-sync.theme-watcher` | Polls dark/light mode changes and triggers cycle + sync (restart on crash) |
 
 `WTS_AGENT_PREFIX` can override `com.wallpaper-theme-sync` during install/uninstall.
+All agents are limited to the `Aqua` session type.
 
 ## File locations
 
@@ -375,10 +355,7 @@ wallpaper-theme-sync/
 │   ├── wallpaper-faded.swift    # Persistent transition daemon source
 │   ├── wallpaper-faded          # Compiled binary
 │   ├── wallpaper-fade.swift     # Standalone CLI tool source
-│   ├── wallpaper-fade           # Compiled binary
-│   └── build-borders-animated.sh  # Source-build helper for borders
-├── docs/
-│   └── borders-animated-build.md  # Reproducible borders build notes
+│   └── wallpaper-fade           # Compiled binary
 ├── configs/wallpaper-colors/
 │   ├── wallpaper_colors.py      # Entry point
 │   ├── config.toml.example      # Config reference
@@ -391,14 +368,13 @@ wallpaper-theme-sync/
 │   │   └── reloaders.py         # Service reload functions
 │   ├── setup-targets.sh         # One-time target integration helper
 │   ├── wallpaper_cycle.sh       # Theme-aware wallpaper cycler
-│   └── borders-cycle.sh         # Borders startup with fixed gradient
+│   └── borders-cycle.sh         # Borders startup (solid accent color)
 ├── launchd/
 │   ├── wallpaper-cycle.plist
 │   ├── wallpaper-colors.plist
 │   ├── wallpaper-faded.plist
-│   ├── borders-animated.plist
+│   ├── borders.plist
 │   └── theme-watcher.plist
-└── borders-animated             # Custom JankyBorders fork binary (arm64)
 ```
 
 ### Deployed
@@ -418,7 +394,7 @@ wallpaper-theme-sync/
 ├── wallpaper_cycle.sh           # Deployed cycle script
 ├── borders-cycle.sh             # Borders startup
 ├── nvim_colors.lua              # Auto-generated Neovim highlights
-├── border_colors                # Accent + secondary hex values
+├── border_colors                # active_color + inactive_color
 ├── hydrotodo_colors.json        # Auto-generated HydroToDo theme
 ├── .last_hash                   # Perceptual hash cache
 ├── .last_wp_path                # Last wallpaper file path
@@ -458,13 +434,12 @@ wallpaper-theme-sync/
 │   └── Contents/
 │       ├── Info.plist
 │       └── MacOS/wallpaper-fade
-└── borders-animated             # Custom JankyBorders fork (arm64)
 
 ~/Library/LaunchAgents/
 ├── com.wallpaper-theme-sync.wallpaper-cycle.plist
 ├── com.wallpaper-theme-sync.wallpaper-colors.plist
 ├── com.wallpaper-theme-sync.wallpaper-faded.plist
-├── com.wallpaper-theme-sync.borders-animated.plist
+├── com.wallpaper-theme-sync.borders.plist
 └── com.wallpaper-theme-sync.theme-watcher.plist
 ```
 
@@ -519,9 +494,7 @@ For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTH
 - **PyObjC** (ships with macOS Python or `pip install pyobjc-framework-Quartz`)
 - **desktoppr** (`brew install desktoppr`) — wallpaper path detection + multi-space propagation
 - **SketchyBar** (`brew install FelixKratz/formulae/sketchybar`)
-- **JankyBorders** (`brew install borders`) — homebrew binary used for IPC to running `borders-animated`
-- **borders-animated** (custom JankyBorders fork with gradient support, optional install via `--install-prebuilt-borders`, arm64 only)
-- **Source build for borders-animated (optional)**: `git`, `make`, and `codesign` (macOS) when using `tools/build-borders-animated.sh`
+- **JankyBorders** (`brew install borders`) — wallpaper-synced border around the focused window
 - **Kitty** with `allow_remote_control yes` and `listen_on unix:/tmp/kitty-sock-*`
 - **WezTerm** (optional) — set `color_scheme = "wallpaper"` in your WezTerm config
 - **Alacritty** (optional) — import generated `wallpaper.toml` in `alacritty.toml`
@@ -556,8 +529,9 @@ All image processing is done in memory — no temp files written to disk. The tr
 - **WatchPaths**: fires when `~/Library/Application Support/com.apple.wallpaper/Store` changes
 - **StartInterval**: polls every 120 seconds as a safety net for third-party wallpaper apps
 - **ThrottleInterval**: 2 seconds minimum between runs
+- **Session scope**: `Aqua` only
 
 **Transitions** (`wallpaper-faded`):
 - Persistent daemon with `DispatchSource` file watcher on the same wallpaper store
 - Reacts within ~100ms of wallpaper change
-- `KeepAlive` launchd agent ensures it's always running
+- Launchd restarts on crash (`KeepAlive.SuccessfulExit=false`) with **ThrottleInterval=10**

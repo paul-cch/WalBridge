@@ -2,18 +2,26 @@
 
 import os
 
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, safe_home_path, sanitize_filename
 
 DEFAULT_THEME_FILE = "wallpaper.conf"
 
 
 def _theme_file():
-    return os.environ.get("WALLPAPER_GHOSTTY_THEME_FILE", DEFAULT_THEME_FILE)
+    return sanitize_filename(
+        os.environ.get("WALLPAPER_GHOSTTY_THEME_FILE"),
+        DEFAULT_THEME_FILE,
+        "WALLPAPER_GHOSTTY_THEME_FILE",
+    )
 
 
 def _output_path():
     default_path = f"~/.config/ghostty/themes/{_theme_file()}"
-    return os.path.expanduser(os.environ.get("WALLPAPER_GHOSTTY_OUTPUT_PATH", default_path))
+    return safe_home_path(
+        os.environ.get("WALLPAPER_GHOSTTY_OUTPUT_PATH"),
+        default_path,
+        "WALLPAPER_GHOSTTY_OUTPUT_PATH",
+    )
 
 
 def write(scheme, config=None):

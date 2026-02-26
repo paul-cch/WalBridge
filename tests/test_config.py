@@ -45,6 +45,7 @@ accent_override = "not-a-color"
 vivify_sat = -2
 vivify_val = 99
 opacity = "0xB3"
+inactive_opacity = "0x66"
 
 [targets]
 sketchybar = false
@@ -59,9 +60,10 @@ kitty = "yes"
             self.assertEqual(cfg.min_value, 0.55)
             self.assertEqual(cfg.harmonize_factor, 0.25)
             self.assertIsNone(cfg.accent_override)
-            self.assertEqual(cfg.border_vivify_sat, 0.45)
-            self.assertEqual(cfg.border_vivify_val, 0.65)
+            self.assertEqual(cfg.border_vivify_sat, 0.65)
+            self.assertEqual(cfg.border_vivify_val, 0.85)
             self.assertEqual(cfg.border_opacity, 0xB3)
+            self.assertEqual(cfg.border_inactive_opacity, 0x66)
             self.assertFalse(cfg.targets["sketchybar"])
             self.assertTrue(cfg.targets["kitty"])
 

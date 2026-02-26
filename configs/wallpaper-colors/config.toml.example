@@ -26,13 +26,16 @@ harmonize_factor = 0.25
 
 [borders]
 # Border accent minimum saturation (0.0–1.0)
-vivify_sat = 0.45
+vivify_sat = 0.65
 
 # Border accent minimum brightness (0.0–1.0)
-vivify_val = 0.65
+vivify_val = 0.85
 
 # Border opacity (0–255, where 255 = fully opaque)
 opacity = 179  # 0xB3
+
+# Inactive border opacity (0–255, where 255 = fully opaque)
+inactive_opacity = 102  # 0x66
 
 [targets]
 # Enable/disable individual target apps.

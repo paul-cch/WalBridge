@@ -3,10 +3,26 @@
 import os
 
 from ..colors import darken, lighten, vivify
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, safe_home_path
 
-NVIM_COLORS_PATH = os.path.expanduser("~/.config/wallpaper-colors/nvim_colors.lua")
-LUALINE_PATH = os.path.expanduser("~/.config/nvim/lua/lualine/themes/wallpaper.lua")
+DEFAULT_NVIM_COLORS_PATH = "~/.config/wallpaper-colors/nvim_colors.lua"
+DEFAULT_LUALINE_PATH = "~/.config/nvim/lua/lualine/themes/wallpaper.lua"
+
+
+def _nvim_colors_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_NVIM_COLORS_PATH"),
+        DEFAULT_NVIM_COLORS_PATH,
+        "WALLPAPER_NVIM_COLORS_PATH",
+    )
+
+
+def _lualine_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_LUALINE_PATH"),
+        DEFAULT_LUALINE_PATH,
+        "WALLPAPER_LUALINE_PATH",
+    )
 
 
 def write(scheme, config=None):
@@ -330,7 +346,7 @@ end
 
 return M
 """
-    atomic_write(NVIM_COLORS_PATH, content)
+    atomic_write(_nvim_colors_path(), content)
 
 
 def _write_lualine_theme(scheme):
@@ -378,4 +394,4 @@ return {{
   }},
 }}
 """
-    atomic_write(LUALINE_PATH, content)
+    atomic_write(_lualine_path(), content)

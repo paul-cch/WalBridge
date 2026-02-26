@@ -5,16 +5,27 @@ set -euo pipefail
 # Usage:
 #   bash install.sh                         # Install / update
 #   bash install.sh --uninstall             # Remove launchd agents
-#   bash install.sh --install-prebuilt-borders  # Install checked-in borders-animated binary
 #   bash install.sh --setup-targets         # Also wire tmux/btop/iTerm2 target setup
 
+detect_home() {
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c 'import os,pwd; print(pwd.getpwuid(os.getuid()).pw_dir)'
+    else
+        printf '%s\n' "$HOME"
+    fi
+}
+
+resolve_path() {
+    python3 -c 'import os,sys; print(os.path.realpath(os.path.abspath(os.path.expanduser(sys.argv[1]))))' "$1"
+}
+
+REAL_HOME="$(detect_home)"
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_DIR="$HOME/.config/wallpaper-colors"
-BIN_DIR="$HOME/.local/bin"
-LAUNCH_DIR="$HOME/Library/LaunchAgents"
+CONFIG_DIR="$REAL_HOME/.config/wallpaper-colors"
+BIN_DIR="$REAL_HOME/.local/bin"
+LAUNCH_DIR="$REAL_HOME/Library/LaunchAgents"
 CHECKSUM_DIR="$REPO_DIR/checksums"
 AGENT_PREFIX="${WTS_AGENT_PREFIX:-com.wallpaper-theme-sync}"
-INSTALL_PREBUILT_BORDERS=false
 UNINSTALL=false
 SETUP_TARGETS=false
 
@@ -24,11 +35,10 @@ error() { printf 'ERROR: %s\n' "$*" >&2; }
 usage() {
     cat <<'USAGE'
 Usage:
-  bash install.sh [--install-prebuilt-borders] [--setup-targets]
+  bash install.sh [--setup-targets]
   bash install.sh --uninstall
 
 Options:
-  --install-prebuilt-borders  Install checked-in borders-animated after checksum validation
   --setup-targets              Run one-time tmux/btop/iTerm2 setup helper
   --uninstall                 Unload and remove launchd agents for current prefix
 
@@ -42,9 +52,6 @@ parse_args() {
         case "$1" in
             --uninstall)
                 UNINSTALL=true
-                ;;
-            --install-prebuilt-borders)
-                INSTALL_PREBUILT_BORDERS=true
                 ;;
             --setup-targets)
                 SETUP_TARGETS=true
@@ -67,6 +74,18 @@ validate_agent_prefix() {
     if ! printf '%s' "$AGENT_PREFIX" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9.-]*$'; then
         error "Invalid WTS_AGENT_PREFIX: $AGENT_PREFIX"
         error "Allowed pattern: ^[A-Za-z0-9][A-Za-z0-9.-]*$"
+        exit 1
+    fi
+}
+
+validate_home() {
+    if [ -z "$REAL_HOME" ] || [ ! -d "$REAL_HOME" ]; then
+        error "Unable to resolve real home directory"
+        exit 1
+    fi
+
+    if ! printf '%s' "$REAL_HOME" | grep -Eq '^/'; then
+        error "Resolved home is not an absolute path: $REAL_HOME"
         exit 1
     fi
 }
@@ -185,20 +204,6 @@ build_tools() {
 <plist version="1.0"><dict><key>LSUIElement</key><true/></dict></plist>
 PLIST
     done
-
-    # Copy borders-animated only when explicitly requested.
-    if [ -f "$REPO_DIR/borders-animated" ]; then
-        if [ "$INSTALL_PREBUILT_BORDERS" = true ]; then
-            local checksum_file="$CHECKSUM_DIR/borders-animated.sha256"
-            verify_sha256 "$REPO_DIR/borders-animated" "$checksum_file"
-            cp "$REPO_DIR/borders-animated" "$BIN_DIR/"
-            info "  Installed borders-animated (checksum verified)"
-        else
-            info "  Skipped prebuilt borders-animated (pass --install-prebuilt-borders to install it)"
-        fi
-    else
-        info "  borders-animated not found in repo — build from source or download separately"
-    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -206,7 +211,11 @@ PLIST
 # ---------------------------------------------------------------------------
 install_agents() {
     local PYTHON
-    PYTHON=$(detect_python)
+    PYTHON=$(resolve_path "$(detect_python)")
+    if [ ! -x "$PYTHON" ]; then
+        error "Resolved Python is not executable: $PYTHON"
+        exit 1
+    fi
     info "Installing launchd agents (Python: $PYTHON)"
 
     mkdir -p "$LAUNCH_DIR"
@@ -215,7 +224,7 @@ install_agents() {
         name=$(basename "$plist")
         dest=$(plist_dest_path "$name")
         sed \
-            -e "s|__HOME__|$HOME|g" \
+            -e "s|__HOME__|$REAL_HOME|g" \
             -e "s|__PYTHON__|$PYTHON|g" \
             -e "s|__AGENT_PREFIX__|$AGENT_PREFIX|g" \
             "$plist" > "$dest"
@@ -223,15 +232,30 @@ install_agents() {
     done
 }
 
+bootout_agent() {
+    local plist="$1"
+    local uid domain label
+    uid="$(id -u)"
+    domain="gui/$uid"
+    label="$(basename "$plist" .plist)"
+    launchctl bootout "$domain/$label" 2>/dev/null || launchctl bootout "$domain" "$plist" 2>/dev/null || true
+}
+
 # ---------------------------------------------------------------------------
 # Load agents
 # ---------------------------------------------------------------------------
 load_agents() {
+    local uid domain label
+    uid="$(id -u)"
+    domain="gui/$uid"
+
     info "Loading launchd agents"
     for plist in "$LAUNCH_DIR"/"$AGENT_PREFIX".*.plist; do
         [ -f "$plist" ] || continue
-        launchctl unload "$plist" 2>/dev/null || true
-        launchctl load "$plist"
+        label="$(basename "$plist" .plist)"
+        bootout_agent "$plist"
+        launchctl bootstrap "$domain" "$plist"
+        launchctl enable "$domain/$label" 2>/dev/null || true
         info "  Loaded $(basename "$plist")"
     done
 }
@@ -260,7 +284,7 @@ uninstall() {
     info "Uninstalling launchd agents for prefix $AGENT_PREFIX"
     for plist in "$LAUNCH_DIR"/"$AGENT_PREFIX".*.plist; do
         [ -f "$plist" ] || continue
-        launchctl unload "$plist" 2>/dev/null || true
+        bootout_agent "$plist"
         rm "$plist"
         info "  Removed $(basename "$plist")"
     done
@@ -275,6 +299,7 @@ uninstall() {
 # ---------------------------------------------------------------------------
 parse_args "$@"
 validate_agent_prefix
+validate_home
 [ "$UNINSTALL" = true ] && uninstall
 
 echo "wallpaper-theme-sync installer"
@@ -295,4 +320,5 @@ echo "Done!"
 echo "  Config: $CONFIG_DIR/config.toml"
 echo "  Test:   python3 $CONFIG_DIR/wallpaper_colors.py -v"
 echo "  Targets setup (optional): bash install.sh --setup-targets"
+echo "  Launchd: agents run in Aqua; persistent daemons auto-restart with throttle"
 echo "  Logs:   tail -f $CONFIG_DIR/sync.log"

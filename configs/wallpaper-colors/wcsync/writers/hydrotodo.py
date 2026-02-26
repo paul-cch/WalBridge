@@ -3,9 +3,17 @@
 import json
 import os
 
-from ..utils import atomic_write
+from ..utils import atomic_write, safe_home_path
 
-OUTPUT_PATH = os.path.expanduser("~/.config/wallpaper-colors/hydrotodo_colors.json")
+DEFAULT_OUTPUT_PATH = "~/.config/wallpaper-colors/hydrotodo_colors.json"
+
+
+def _output_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_HYDROTODO_OUTPUT_PATH"),
+        DEFAULT_OUTPUT_PATH,
+        "WALLPAPER_HYDROTODO_OUTPUT_PATH",
+    )
 
 
 def write(scheme, config=None):
@@ -21,4 +29,4 @@ def write(scheme, config=None):
         "dark": list(scheme["dark"]),
         "light": list(scheme["light"]),
     }
-    atomic_write(OUTPUT_PATH, json.dumps(theme) + "\n")
+    atomic_write(_output_path(), json.dumps(theme) + "\n")

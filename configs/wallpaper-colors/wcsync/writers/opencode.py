@@ -4,9 +4,17 @@ import json
 import os
 
 from ..colors import darken, vivify
-from ..utils import atomic_write, hex6
+from ..utils import atomic_write, hex6, safe_home_path
 
-OUTPUT_PATH = os.path.expanduser("~/.config/opencode/themes/wallpaper.json")
+DEFAULT_OUTPUT_PATH = "~/.config/opencode/themes/wallpaper.json"
+
+
+def _output_path():
+    return safe_home_path(
+        os.environ.get("WALLPAPER_OPENCODE_OUTPUT_PATH"),
+        DEFAULT_OUTPUT_PATH,
+        "WALLPAPER_OPENCODE_OUTPUT_PATH",
+    )
 
 
 def write(scheme, config=None):
@@ -85,4 +93,4 @@ def write(scheme, config=None):
             "syntaxPunctuation": grey,
         },
     }
-    atomic_write(OUTPUT_PATH, json.dumps(theme, indent=2) + "\n")
+    atomic_write(_output_path(), json.dumps(theme, indent=2) + "\n")

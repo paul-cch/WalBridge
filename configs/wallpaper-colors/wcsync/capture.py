@@ -12,6 +12,7 @@ import shutil
 import Quartz
 from PIL import Image
 
+from .config import Config
 from .utils import log
 
 DESKTOPPR = shutil.which("desktoppr") or "/usr/local/bin/desktoppr"
@@ -157,8 +158,11 @@ def capture_wallpaper(display=1, retries=3, retry_delay=0.5):
 
         # Validate: reject all-black images (likely capture before render)
         thumb = result.resize((4, 4), Image.Resampling.NEAREST)
-        pixels = list(thumb.getdata())
-        if all(sum(p) < 15 for p in pixels):
+        raw_thumb = thumb.tobytes()
+        if all(
+            (raw_thumb[i] + raw_thumb[i + 1] + raw_thumb[i + 2]) < 15
+            for i in range(0, len(raw_thumb), 3)
+        ):
             log("Captured image is all black, retrying")
             if attempt < retries - 1:
                 time.sleep(retry_delay * (2**attempt))
@@ -189,8 +193,6 @@ def load_wallpaper(config=None):
     Returns:
         (PIL Image in RGB, wallpaper_path_or_None)
     """
-    from .config import Config
-
     if config is None:
         config = Config()
 

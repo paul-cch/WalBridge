@@ -6,6 +6,7 @@ from collections import Counter
 
 from PIL import Image
 
+from .config import Config
 from .utils import clamp
 
 
@@ -44,6 +45,15 @@ def vivify(rgb, min_sat=0.75, min_val=0.85):
     return (clamp(r * 255), clamp(g * 255), clamp(b * 255))
 
 
+def mute(rgb, sat_factor=0.28, val_factor=0.60, min_val=0.24):
+    """Desaturate and dim a color while keeping enough contrast to remain visible."""
+    h, s, v = colorsys.rgb_to_hsv(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255)
+    s = max(0.08, min(1.0, s * sat_factor))
+    v = max(min_val, min(1.0, v * val_factor))
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    return (clamp(r * 255), clamp(g * 255), clamp(b * 255))
+
+
 def harmonize(target_deg, accent_deg, factor=0.25):
     """Shift target hue toward accent hue by *factor* along the shortest arc."""
     diff = accent_deg - target_deg
@@ -58,8 +68,8 @@ def harmonize(target_deg, accent_deg, factor=0.25):
 
 
 def image_hash(img):
-    """Quick perceptual hash from a pre-resized PIL Image."""
-    thumb = img.resize((16, 16), Image.Resampling.LANCZOS)
+    """Quick perceptual hash from any PIL Image."""
+    thumb = img.resize((16, 16), Image.Resampling.NEAREST)
     return hashlib.sha256(thumb.tobytes()).hexdigest()
 
 
@@ -137,30 +147,27 @@ def build_scheme(palette, config=None):
 
     Accepts an optional Config to override default tuning parameters.
     """
-    from .config import Config
-
     if config is None:
         config = Config()
 
     # If user provided an accent override, use it instead of auto-detecting
     if config.accent_override:
         accent = _parse_hex(config.accent_override)
-        h, s, v = colorsys.rgb_to_hsv(accent[0] / 255, accent[1] / 255, accent[2] / 255)
-        s = max(s, config.min_saturation)
-        v = max(v, config.min_value)
     else:
         scored = []
-        for c in palette:
-            s = sat(*c)
-            l = lum(*c) / 255
-            score = s * (0.3 + 0.7 * l)
-            scored.append((c, score))
+        for color in palette:
+            color_sat = sat(*color)
+            color_lum = lum(*color) / 255
+            score = color_sat * (0.3 + 0.7 * color_lum)
+            scored.append((color, score))
         scored.sort(key=lambda x: x[1], reverse=True)
         accent = scored[0][0]
 
-        h, s, v = colorsys.rgb_to_hsv(accent[0] / 255, accent[1] / 255, accent[2] / 255)
-        s = max(s, config.min_saturation)
-        v = max(v, config.min_value)
+    accent_hue, accent_sat, accent_val = colorsys.rgb_to_hsv(
+        accent[0] / 255, accent[1] / 255, accent[2] / 255
+    )
+    accent_sat = max(accent_sat, config.min_saturation)
+    accent_val = max(accent_val, config.min_value)
 
     by_lum = sorted(palette, key=lambda c: lum(*c))
     dark = by_lum[0]
@@ -173,37 +180,35 @@ def build_scheme(palette, config=None):
     if lum(*light) < 160:
         light = (201, 209, 217)
 
-    ns = min(s + 0.1, 1.0)
-    nv = min(v + 0.05, 1.0)
+    scheme_sat = min(accent_sat + 0.1, 1.0)
+    scheme_val = min(accent_val + 0.05, 1.0)
 
     secondary = pick_secondary(palette, accent)
 
     border_accent = vivify(
-        accent, min_sat=config.border_vivify_sat, min_val=config.border_vivify_val
+        accent,
+        min_sat=max(config.border_vivify_sat, 0.65),
+        min_val=max(config.border_vivify_val, 0.85),
     )
-    border_secondary = vivify(
-        secondary,
-        min_sat=max(config.border_vivify_sat - 0.05, 0),
-        min_val=max(config.border_vivify_val - 0.05, 0),
-    )
+    border_inactive = mute(border_accent)
 
-    ah = h * 360
+    accent_deg = accent_hue * 360
     hf = config.harmonize_factor
     return {
-        "accent": color_at_hue(ah, s, v),
+        "accent": color_at_hue(accent_deg, accent_sat, accent_val),
         "secondary": secondary,
         "border_accent": border_accent,
-        "border_secondary": border_secondary,
+        "border_inactive": border_inactive,
         "dark": dark,
         "light": light,
         "bar_bg": dark,
         "item_bg": lighten(dark, 0.08),
         "grey": darken(light, 0.55),
-        "red": color_at_hue(harmonize(0, ah, hf), ns, nv),
-        "green": color_at_hue(harmonize(120, ah, hf), ns, nv),
-        "yellow": color_at_hue(harmonize(50, ah, hf), ns, nv),
-        "cyan": color_at_hue(harmonize(185, ah, hf), ns, nv),
-        "purple": color_at_hue(harmonize(270, ah, hf), ns, nv),
-        "orange": color_at_hue(harmonize(25, ah, hf), ns, nv),
-        "pink": color_at_hue(harmonize(340, ah, 0.20), ns * 0.85, nv),
+        "red": color_at_hue(harmonize(0, accent_deg, hf), scheme_sat, scheme_val),
+        "green": color_at_hue(harmonize(120, accent_deg, hf), scheme_sat, scheme_val),
+        "yellow": color_at_hue(harmonize(50, accent_deg, hf), scheme_sat, scheme_val),
+        "cyan": color_at_hue(harmonize(185, accent_deg, hf), scheme_sat, scheme_val),
+        "purple": color_at_hue(harmonize(270, accent_deg, hf), scheme_sat, scheme_val),
+        "orange": color_at_hue(harmonize(25, accent_deg, hf), scheme_sat, scheme_val),
+        "pink": color_at_hue(harmonize(340, accent_deg, 0.20), scheme_sat * 0.85, scheme_val),
     }

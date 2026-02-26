@@ -79,9 +79,10 @@ class Config:
     accent_override: str | None = None  # e.g. "#3a7bd5"
 
     # Border vivify
-    border_vivify_sat: float = 0.45
-    border_vivify_val: float = 0.65
+    border_vivify_sat: float = 0.65
+    border_vivify_val: float = 0.85
     border_opacity: int = 0xB3
+    border_inactive_opacity: int = 0x66
 
     # Target toggles
     targets: dict = field(default_factory=lambda: dict(_DEFAULT_TARGETS))
@@ -133,6 +134,12 @@ class Config:
                 opacity = int(opacity, 0)
             except ValueError:
                 opacity = 0xB3
+        inactive_opacity = borders.get("inactive_opacity", 0x66)
+        if isinstance(inactive_opacity, str):
+            try:
+                inactive_opacity = int(inactive_opacity, 0)
+            except ValueError:
+                inactive_opacity = 0x66
 
         return cls(
             display=_as_int(general.get("display", 1), 1, min_value=1),
@@ -146,11 +153,12 @@ class Config:
             ),
             accent_override=_as_hex_color(scheme.get("accent_override")),
             border_vivify_sat=_as_float(
-                borders.get("vivify_sat", 0.45), 0.45, min_value=0.0, max_value=1.0
+                borders.get("vivify_sat", 0.65), 0.65, min_value=0.0, max_value=1.0
             ),
             border_vivify_val=_as_float(
-                borders.get("vivify_val", 0.65), 0.65, min_value=0.0, max_value=1.0
+                borders.get("vivify_val", 0.85), 0.85, min_value=0.0, max_value=1.0
             ),
             border_opacity=_as_int(opacity, 0xB3, min_value=0, max_value=255),
+            border_inactive_opacity=_as_int(inactive_opacity, 0x66, min_value=0, max_value=255),
             targets=targets,
         )

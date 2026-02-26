@@ -6,16 +6,50 @@ set -euo pipefail
 #   bash ~/.config/wallpaper-colors/setup-targets.sh
 #   bash ~/.config/wallpaper-colors/setup-targets.sh --open-iterm
 
-TMUX_CONF="${WALLPAPER_TMUX_CONF:-$HOME/.tmux.conf}"
-TMUX_THEME_PATH="${WALLPAPER_TMUX_OUTPUT_PATH:-$HOME/.config/tmux/themes/wallpaper.conf}"
-BTOP_CONF="${WALLPAPER_BTOP_CONF:-$HOME/.config/btop/btop.conf}"
-BTOP_THEME_NAME="${WALLPAPER_BTOP_THEME_NAME:-wallpaper}"
-ITERM_PRESET_NAME="${WALLPAPER_ITERM_PRESET_NAME:-wallpaper}"
-ITERM_PRESET_PATH="${WALLPAPER_ITERM_OUTPUT_PATH:-$HOME/.config/iterm2/colors/$ITERM_PRESET_NAME.itermcolors}"
-OPEN_ITERM=false
-
 info()  { printf '→ %s\n' "$*"; }
 warn()  { printf 'WARN: %s\n' "$*" >&2; }
+
+resolve_path() {
+    python3 -c 'import os,sys; print(os.path.realpath(os.path.abspath(os.path.expanduser(sys.argv[1]))))' "$1"
+}
+
+safe_home_path() {
+    local raw="$1"
+    local default="$2"
+    local var_name="$3"
+    local home resolved fallback
+
+    home="$(resolve_path "$HOME")"
+    resolved="$(resolve_path "$raw")"
+    fallback="$(resolve_path "$default")"
+
+    if [[ "$resolved" == "$home" || "$resolved" == "$home/"* ]]; then
+        printf '%s\n' "$resolved"
+    else
+        warn "Ignoring invalid $var_name=$raw (must stay within $home)"
+        printf '%s\n' "$fallback"
+    fi
+}
+
+sanitize_name() {
+    local value="$1"
+    local default="$2"
+    local var_name="$3"
+    if [[ "$value" =~ ^[A-Za-z0-9_-]+$ ]]; then
+        printf '%s\n' "$value"
+    else
+        warn "Ignoring invalid $var_name=$value (expected [A-Za-z0-9_-]+)"
+        printf '%s\n' "$default"
+    fi
+}
+
+TMUX_CONF="$(safe_home_path "${WALLPAPER_TMUX_CONF:-$HOME/.tmux.conf}" "$HOME/.tmux.conf" "WALLPAPER_TMUX_CONF")"
+TMUX_THEME_PATH="$(safe_home_path "${WALLPAPER_TMUX_OUTPUT_PATH:-$HOME/.config/tmux/themes/wallpaper.conf}" "$HOME/.config/tmux/themes/wallpaper.conf" "WALLPAPER_TMUX_OUTPUT_PATH")"
+BTOP_CONF="$(safe_home_path "${WALLPAPER_BTOP_CONF:-$HOME/.config/btop/btop.conf}" "$HOME/.config/btop/btop.conf" "WALLPAPER_BTOP_CONF")"
+BTOP_THEME_NAME="$(sanitize_name "${WALLPAPER_BTOP_THEME_NAME:-wallpaper}" "wallpaper" "WALLPAPER_BTOP_THEME_NAME")"
+ITERM_PRESET_NAME="$(sanitize_name "${WALLPAPER_ITERM_PRESET_NAME:-wallpaper}" "wallpaper" "WALLPAPER_ITERM_PRESET_NAME")"
+ITERM_PRESET_PATH="$(safe_home_path "${WALLPAPER_ITERM_OUTPUT_PATH:-$HOME/.config/iterm2/colors/$ITERM_PRESET_NAME.itermcolors}" "$HOME/.config/iterm2/colors/$ITERM_PRESET_NAME.itermcolors" "WALLPAPER_ITERM_OUTPUT_PATH")"
+OPEN_ITERM=false
 
 parse_args() {
     while [ $# -gt 0 ]; do

@@ -2,18 +2,26 @@
 
 import os
 
-from ..utils import atomic_write
+from ..utils import atomic_write, safe_home_path, sanitize_name
 
 DEFAULT_PRESET_NAME = "wallpaper"
 
 
 def _preset_name():
-    return os.environ.get("WALLPAPER_ITERM_PRESET_NAME", DEFAULT_PRESET_NAME)
+    return sanitize_name(
+        os.environ.get("WALLPAPER_ITERM_PRESET_NAME"),
+        DEFAULT_PRESET_NAME,
+        "WALLPAPER_ITERM_PRESET_NAME",
+    )
 
 
 def _output_path():
     default_path = f"~/.config/iterm2/colors/{_preset_name()}.itermcolors"
-    return os.path.expanduser(os.environ.get("WALLPAPER_ITERM_OUTPUT_PATH", default_path))
+    return safe_home_path(
+        os.environ.get("WALLPAPER_ITERM_OUTPUT_PATH"),
+        default_path,
+        "WALLPAPER_ITERM_OUTPUT_PATH",
+    )
 
 
 def _plist_color(name, rgb, alpha=1.0):

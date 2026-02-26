@@ -32,9 +32,10 @@ def reload_sketchybar():
 
 def reload_kitty():
     """Live-reload Kitty colors via remote control. Returns list of Popen."""
-    from .writers.kitty import OUTPUT_PATH
+    from .writers.kitty import output_path
 
     procs = []
+    colors_path = output_path()
     for sock in glob.glob("/tmp/kitty-sock-*"):
         procs.append(
             subprocess.Popen(
@@ -46,7 +47,7 @@ def reload_kitty():
                     "set-colors",
                     "-a",
                     "-c",
-                    OUTPUT_PATH,
+                    colors_path,
                 ],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -101,23 +102,19 @@ def reload_tmux():
 
 
 def reload_borders(scheme, config=None):
-    """Push new gradient to running borders-animated via IPC. Returns Popen.
-
-    Uses the homebrew borders binary — it shares the same mach port as
-    borders-animated so it can send IPC without the heavyweight init
-    that caused flicker when spawning a second borders-animated.
-    """
+    """Push new active_color to running borders via IPC. Returns Popen."""
     if config is None:
         config = Config()
 
-    opacity = config.border_opacity
-    accent = hexc(*scheme["border_accent"], a=opacity)
-    secondary = hexc(*scheme["border_secondary"], a=opacity)
+    accent = hexc(*scheme["border_accent"], a=config.border_opacity)
+    inactive_rgb = scheme.get("border_inactive") or scheme.get("grey", scheme["border_accent"])
+    inactive = hexc(*inactive_rgb, a=config.border_inactive_opacity)
     return subprocess.Popen(
         [
             _find_bin("borders"),
             "width=3.0",
-            f"active_color=gradient(top_left={accent},bottom_right={secondary})",
+            f"active_color={accent}",
+            f"inactive_color={inactive}",
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
