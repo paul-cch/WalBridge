@@ -1,12 +1,12 @@
 :root {
   --bg: #0f1724;
-  --bg-soft: #162237;
-  --panel: #1d2c45;
   --text: #f2f6fc;
   --muted: #b4c4d8;
   --accent: #f08c5a;
   --accent-2: #5fb7b0;
   --line: #304666;
+  --accent-warm: #ffb347;
+  --accent-dark: #231209;
 }
 
 * {
@@ -17,10 +17,7 @@ body {
   margin: 0;
   font-family: "Space Grotesk", sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at 80% -20%, #2f4c7a 0%, transparent 45%),
-    radial-gradient(circle at -10% 30%, #3d2f53 0%, transparent 35%),
-    linear-gradient(165deg, var(--bg) 0%, #101f33 55%, #121d2d 100%);
+  background: linear-gradient(165deg, var(--bg) 0%, #101f33 55%, #121d2d 100%);
   min-height: 100vh;
 }
 
@@ -104,8 +101,8 @@ h1 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #ffb347);
-  color: #231209;
+  background: linear-gradient(135deg, var(--accent), var(--accent-warm));
+  color: var(--accent-dark);
 }
 
 .btn-ghost {
