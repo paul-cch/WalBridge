@@ -24,6 +24,7 @@ _DEFAULT_TARGETS = {
     "starship": True,
     "opencode": True,
     "hydrotodo": True,
+    "vscode": True,
 }
 
 

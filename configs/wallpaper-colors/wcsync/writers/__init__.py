@@ -18,6 +18,7 @@ from . import (
     sketchybar,
     starship,
     tmux,
+    vscode,
     wezterm,
     yazi,
 )
@@ -38,6 +39,7 @@ _WRITERS = {
     "starship": starship,
     "opencode": opencode,
     "hydrotodo": hydrotodo,
+    "vscode": vscode,
 }
 
 def write_all(scheme, config=None):
