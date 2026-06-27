@@ -165,3 +165,4 @@ To support different local layouts, these environment variables are supported:
 - `WALLPAPER_YAZI_FLAVOR_NAME` (changes default Yazi flavor folder name)
 - `WALLPAPER_YAZI_OUTPUT_PATH` (explicit Yazi flavor output path)
 - `WALLPAPER_YAZI_THEME_PATH` / `WALLPAPER_YAZI_WRITE_THEME_SELECTOR`
+- `WALLPAPER_VSCODE_SETTINGS_PATH` (opt-in VS Code settings.json target)

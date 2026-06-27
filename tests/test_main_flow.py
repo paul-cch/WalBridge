@@ -40,8 +40,9 @@ class MainFlowTests(unittest.TestCase):
             patch("wallpaper_colors.Config.load", return_value=Config()),
             patch("wallpaper_colors.load_wallpaper", return_value=(img, "/tmp/wall.jpg")),
             patch("wallpaper_colors.image_hash", return_value="samehash"),
+            patch("wallpaper_colors.config_signature", return_value="sig"),
             patch("wallpaper_colors.os.path.exists", return_value=True),
-            patch("builtins.open", mock_open(read_data="samehash")),
+            patch("builtins.open", mock_open(read_data="samehash:sig")),
             patch("wallpaper_colors.write_all") as write_all_mock,
             patch("wallpaper_colors.reload_all") as reload_all_mock,
             patch("wallpaper_colors.atomic_write") as atomic_write_mock,
@@ -54,6 +55,42 @@ class MainFlowTests(unittest.TestCase):
         reload_all_mock.assert_not_called()
         atomic_write_mock.assert_not_called()
         run_mock.assert_not_called()
+
+    def test_main_reruns_when_config_signature_changes(self):
+        img = MagicMock()
+        img.size = (1920, 1080)
+        small = MagicMock()
+        img.resize.return_value = small
+        cfg = Config()
+        scheme = {
+            "accent": (1, 2, 3),
+            "secondary": (4, 5, 6),
+            "dark": (7, 8, 9),
+            "light": (10, 11, 12),
+            "border_accent": (13, 14, 15),
+            "border_inactive": (16, 17, 18),
+        }
+
+        with (
+            patch("wallpaper_colors.Config.load", return_value=cfg),
+            patch("wallpaper_colors.load_wallpaper", return_value=(img, "/tmp/wall.jpg")),
+            patch("wallpaper_colors.image_hash", return_value="samehash"),
+            patch("wallpaper_colors.config_signature", return_value="new-sig"),
+            patch("wallpaper_colors.os.path.exists", return_value=True),
+            patch("builtins.open", mock_open(read_data="samehash:old-sig")),
+            patch("wallpaper_colors.extract_palette", return_value=[(1, 2, 3)]),
+            patch("wallpaper_colors.build_scheme", return_value=scheme),
+            patch("wallpaper_colors.write_all", return_value=[]) as write_all_mock,
+            patch("wallpaper_colors.reload_all") as reload_all_mock,
+            patch("wallpaper_colors.atomic_write") as atomic_write_mock,
+            patch("wallpaper_colors.subprocess.run"),
+        ):
+            wallpaper_colors.main()
+
+        img.resize.assert_called_once_with((200, 200), Image.Resampling.LANCZOS)
+        write_all_mock.assert_called_once_with(scheme, cfg)
+        reload_all_mock.assert_called_once_with(scheme, cfg)
+        atomic_write_mock.assert_any_call(wallpaper_colors.CACHE_FILE, "samehash:new-sig")
 
     def test_main_force_runs_full_pipeline(self):
         img = MagicMock()
@@ -75,6 +112,7 @@ class MainFlowTests(unittest.TestCase):
             patch("wallpaper_colors.Config.load", return_value=cfg),
             patch("wallpaper_colors.load_wallpaper", return_value=(img, "/tmp/wall.jpg")),
             patch("wallpaper_colors.image_hash", return_value="newhash"),
+            patch("wallpaper_colors.config_signature", return_value="sig"),
             patch("wallpaper_colors.extract_palette", return_value=[(1, 2, 3)]) as extract_mock,
             patch("wallpaper_colors.build_scheme", return_value=scheme) as build_mock,
             patch("wallpaper_colors.write_all", return_value=[]) as write_all_mock,
@@ -92,7 +130,7 @@ class MainFlowTests(unittest.TestCase):
         reload_all_mock.assert_called_once_with(scheme, cfg)
         atomic_write_mock.assert_has_calls(
             [
-                call(wallpaper_colors.CACHE_FILE, "newhash"),
+                call(wallpaper_colors.CACHE_FILE, "newhash:sig"),
                 call(wallpaper_colors.LAST_WP_FILE, "/tmp/wall.jpg"),
             ],
             any_order=False,
@@ -109,6 +147,7 @@ class MainFlowTests(unittest.TestCase):
             patch("wallpaper_colors.Config.load", return_value=cfg),
             patch("wallpaper_colors.load_wallpaper", return_value=(img, "/tmp/wall.jpg")),
             patch("wallpaper_colors.image_hash", return_value="newhash"),
+            patch("wallpaper_colors.config_signature", return_value="sig"),
             patch("wallpaper_colors.extract_palette", return_value=[(1, 2, 3)]),
             patch("wallpaper_colors.build_scheme", return_value={"border_accent": (13, 14, 15)}),
             patch("wallpaper_colors.write_all", return_value=["kitty"]),

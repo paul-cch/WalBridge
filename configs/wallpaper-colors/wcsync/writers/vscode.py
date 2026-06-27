@@ -13,6 +13,7 @@ from ..colors import lighten
 from ..utils import atomic_write, clamp, hex6, log, safe_home_path
 
 DEFAULT_SETTINGS_PATH = "~/Library/Application Support/Code/User/settings.json"
+RULE_NAME_PREFIX = "WalBridge "
 
 
 def _syntax(rgb, max_sat=0.60, min_val=0.70, max_val=0.92):
@@ -79,7 +80,24 @@ def _update_settings(token_customizations):
 
     tcc = settings.setdefault("editor.tokenColorCustomizations", {})
     if isinstance(tcc, dict):
-        tcc["textMateRules"] = token_customizations
+        existing_rules = tcc.get("textMateRules", [])
+        if not isinstance(existing_rules, list):
+            existing_rules = []
+        preserved_rules = [
+            rule
+            for rule in existing_rules
+            if not (
+                isinstance(rule, dict)
+                and isinstance(rule.get("name"), str)
+                and rule["name"].startswith(RULE_NAME_PREFIX)
+            )
+        ]
+        managed_rules = []
+        for idx, rule in enumerate(token_customizations, start=1):
+            managed = dict(rule)
+            managed["name"] = f"{RULE_NAME_PREFIX}{idx:02d}"
+            managed_rules.append(managed)
+        tcc["textMateRules"] = preserved_rules + managed_rules
 
     atomic_write(path, json.dumps(settings, indent=4) + "\n")
 

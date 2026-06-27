@@ -9,6 +9,15 @@ set -euo pipefail
 # Override with WALLPAPER_DIR to support non-default folder layouts.
 WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/wallpaper}"
 STATE_DIR="$HOME/.config/wallpaper-colors"
+mkdir -p "$STATE_DIR"
+
+LOCK_DIR="$STATE_DIR/.cycle.lock"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo "[$(date +%H:%M:%S)] Wallpaper cycle already running, skipping" >&2
+    exit 0
+fi
+trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+
 # Prefer full paths to limit PATH hijack in launchd context
 if command -v desktoppr >/dev/null 2>&1; then
     DESKTOPPR="$(command -v desktoppr)"

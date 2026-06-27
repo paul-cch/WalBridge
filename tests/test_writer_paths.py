@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import tempfile
@@ -11,7 +12,7 @@ import sys
 
 sys.path.insert(0, str(WCSYNC_ROOT))
 
-from wcsync.writers import alacritty, borders, btop, ghostty, iterm2, tmux, wezterm, yazi
+from wcsync.writers import alacritty, borders, btop, ghostty, iterm2, tmux, vscode, wezterm, yazi
 from wcsync.writers import hydrotodo, kitty, neovim, opencode, sketchybar, starship
 
 
@@ -419,6 +420,49 @@ class WriterPathOverrideTests(unittest.TestCase):
                 yazi.write(SCHEME)
 
             self.assertTrue(expected.is_file())
+
+    def test_vscode_writer_preserves_user_textmate_rules(self):
+        with tempfile.TemporaryDirectory() as td:
+            home = pathlib.Path(td)
+            settings_path = home / "Code" / "User" / "settings.json"
+            settings_path.parent.mkdir(parents=True, exist_ok=True)
+            settings_path.write_text(
+                json.dumps(
+                    {
+                        "editor.tokenColorCustomizations": {
+                            "textMateRules": [
+                                {
+                                    "name": "Custom rule",
+                                    "scope": ["comment"],
+                                    "settings": {"foreground": "#123456"},
+                                },
+                                {
+                                    "name": "WalBridge old",
+                                    "scope": ["string"],
+                                    "settings": {"foreground": "#abcdef"},
+                                },
+                            ]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {
+                    "HOME": str(home),
+                    "WALLPAPER_VSCODE_SETTINGS_PATH": str(settings_path),
+                },
+                clear=False,
+            ):
+                vscode.write(SCHEME)
+
+            data = json.loads(settings_path.read_text(encoding="utf-8"))
+            rules = data["editor.tokenColorCustomizations"]["textMateRules"]
+            names = [rule.get("name") for rule in rules]
+            self.assertIn("Custom rule", names)
+            self.assertNotIn("WalBridge old", names)
+            self.assertIn("WalBridge 01", names)
 
 
 if __name__ == "__main__":

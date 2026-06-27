@@ -132,7 +132,7 @@ jobs:
           test -f "$CONFIG/setup-targets.sh"
           test -f "$BIN/WallpaperFaded.app/Contents/MacOS/wallpaper-faded"
           test -f "$BIN/WallpaperFade.app/Contents/MacOS/wallpaper-fade"
-          for name in wallpaper-colors theme-watcher wallpaper-cycle borders; do
+          for name in wallpaper-colors theme-watcher wallpaper-cycle wallpaper-faded borders; do
             test -f "$LAUNCH/com.walbridge.$name.plist"
           done
           test -d "$HOME/.local/share/borders"

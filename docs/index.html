@@ -103,7 +103,7 @@
       <ol>
         <li>Capture the current wallpaper per display, with fallback for dynamic wallpapers.</li>
         <li>Extract the dominant palette (median-cut quantization, default 8 colors) and generate a coherent color scheme.</li>
-        <li>Write target configs atomically, reload supported apps, and skip unchanged wallpapers via perceptual hash (~370ms).</li>
+        <li>Write target configs atomically, reload supported apps, and skip unchanged wallpaper/config pairs via cache keys (~370ms).</li>
       </ol>
     </section>
 
@@ -139,7 +139,8 @@ neovim = true
 yazi = true
 starship = true
 opencode = true
-hydrotodo = true</code></pre>
+hydrotodo = true
+vscode = false  # Opt-in; edits VS Code User/settings.json token colors</code></pre>
     </section>
 
     <section id="targets">
@@ -164,6 +165,7 @@ hydrotodo = true</code></pre>
             <tr><td>Starship</td><td>~/.config/starship.toml</td><td>On next prompt</td></tr>
             <tr><td>OpenCode</td><td>~/.config/opencode/themes/wallpaper.json</td><td>On launch</td></tr>
             <tr><td>HydroToDo</td><td>~/.config/wallpaper-colors/hydrotodo_colors.json</td><td>File watch</td></tr>
+            <tr><td>VS Code (opt-in)</td><td>~/Library/Application Support/Code/User/settings.json token colors</td><td>Settings reload</td></tr>
           </tbody>
         </table>
       </div>
@@ -193,7 +195,7 @@ hydrotodo = true</code></pre>
         </thead>
         <tbody>
           <tr><td>Full color sync</td><td>~1s</td></tr>
-          <tr><td>No-change skip (hash match)</td><td>~370ms</td></tr>
+          <tr><td>No-change skip (image/config hash match)</td><td>~370ms</td></tr>
           <tr><td>Transition animation</td><td>700ms</td></tr>
           <tr><td>Transition detection latency</td><td>~100ms</td></tr>
           <tr><td>CPU at idle (daemon + poll)</td><td>negligible</td></tr>

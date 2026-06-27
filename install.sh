@@ -235,11 +235,22 @@ install_agents() {
         local name dest
         name=$(basename "$plist")
         dest=$(plist_dest_path "$name")
-        sed \
-            -e "s@__HOME__@$REAL_HOME@g" \
-            -e "s@__PYTHON__@$PYTHON@g" \
-            -e "s@__AGENT_PREFIX__@$AGENT_PREFIX@g" \
-            "$plist" > "$dest"
+        "$PYTHON" - "$plist" "$dest" "$REAL_HOME" "$PYTHON" "$AGENT_PREFIX" <<'PY'
+import html
+import pathlib
+import sys
+
+source, dest, home, python, agent_prefix = sys.argv[1:]
+replacements = {
+    "__HOME__": html.escape(home, quote=False),
+    "__PYTHON__": html.escape(python, quote=False),
+    "__AGENT_PREFIX__": html.escape(agent_prefix, quote=False),
+}
+text = pathlib.Path(source).read_text(encoding="utf-8")
+for needle, value in replacements.items():
+    text = text.replace(needle, value)
+pathlib.Path(dest).write_text(text, encoding="utf-8")
+PY
         info "  $(basename "$dest")"
     done
 }

@@ -44,8 +44,6 @@ get_theme() {
     fi
 }
 
-LAST=$(cat "$THEME_FILE" 2>/dev/null || echo "")
-
 # Track display count so we re-apply wallpaper when a monitor is connected/disconnected.
 # desktoppr with no args prints one line per display.
 DESKTOPPR_BIN="$(command -v desktoppr 2>/dev/null || echo /opt/homebrew/bin/desktoppr)"
@@ -54,6 +52,13 @@ get_display_count() {
 }
 LAST_DISPLAY_COUNT="$(get_display_count)"
 CURRENT_WP_FILE="$STATE_DIR/.current_wallpaper"
+
+if [[ -f "$THEME_FILE" ]]; then
+    LAST="$(cat "$THEME_FILE" 2>/dev/null || echo "")"
+else
+    LAST="$(get_theme)"
+    printf '%s\n' "$LAST" > "$THEME_FILE"
+fi
 
 reapply_wallpaper() {
     local wp

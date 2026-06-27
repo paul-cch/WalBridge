@@ -61,7 +61,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 4. **Vivify**: Border colors use the same hues but with configurable saturation/value floors so they pop on screen.
 5. **Write**: Regenerates all config files for every enabled target app.
 6. **Reload**: SketchyBar (`--reload`), JankyBorders (IPC via homebrew `borders`), Kitty (`kitten @ set-colors`), Neovim (`--remote-send` to all instances), and tmux (`source-file` when a server is running). WezTerm, Alacritty, Ghostty, iTerm2, btop, Yazi, Starship, OpenCode, and HydroToDo apply on next app reload/launch/prompt.
-7. **Dedup**: Caches a perceptual hash (sha256 of 16x16 thumbnail) so unchanged wallpapers are skipped in ~370ms.
+7. **Dedup**: Caches a perceptual wallpaper hash plus config signature so unchanged wallpaper/config pairs are skipped in ~370ms.
 
 ### Wallpaper transitions
 
@@ -125,6 +125,7 @@ yazi = true
 starship = true
 opencode = true
 hydrotodo = true
+vscode = false       # Opt-in; edits VS Code User/settings.json token colors
 ```
 
 ### Multi-monitor
@@ -239,6 +240,7 @@ wallpaper-fade --from ~/Pictures/wallpaper/old.jpg
 | **Starship** | `~/.config/starship.toml` | Applied on next prompt render |
 | **OpenCode** | `~/.config/opencode/themes/wallpaper.json` | Applied on next launch |
 | **HydroToDo** | `~/.config/wallpaper-colors/hydrotodo_colors.json` | Hot-reload via file watch |
+| **VS Code** (opt-in) | `~/Library/Application Support/Code/User/settings.json` token colors | Applied when settings.json changes |
 
 ### One-time target wiring
 
@@ -508,6 +510,7 @@ For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTH
 - **btop** (optional) — run `bash ~/.config/wallpaper-colors/setup-targets.sh` once
 - **Neovim** with `wallpaper-sync.lua` config
 - **Yazi** — flavor applied on launch; theme selector is auto-managed unless custom `theme.toml` is detected
+- **VS Code** (optional) — enable `targets.vscode` to manage TextMate token colors in User settings
 - **Xcode Command Line Tools** (for `swiftc`)
 
 ## Performance
@@ -515,7 +518,7 @@ For production use, prefer `bash install.sh` (it substitutes `__HOME__`, `__PYTH
 | Metric | Value |
 |---|---|
 | Full color sync | ~1s |
-| No-change skip (hash match) | ~370ms |
+| No-change skip (image/config hash match) | ~370ms |
 | Transition animation | 700ms |
 | Transition detection latency | ~100ms |
 | CPU at idle (daemon + 2-min poll) | negligible |

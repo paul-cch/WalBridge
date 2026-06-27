@@ -54,3 +54,4 @@ yazi = true
 starship = true
 opencode = true
 hydrotodo = true
+vscode = false  # Opt-in: edits VS Code User/settings.json token colors

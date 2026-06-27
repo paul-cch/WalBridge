@@ -15,9 +15,12 @@ Usage:
     python3 wallpaper_colors.py [-v|--verbose] [-f|--force]
 """
 
+import json
 import os
 import subprocess
 import sys
+from dataclasses import asdict
+from hashlib import sha256
 
 from PIL import Image
 
@@ -30,6 +33,24 @@ from wcsync.writers import write_all
 
 CACHE_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_hash")
 LAST_WP_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_wp_path")
+
+
+def config_signature(config):
+    """Hash config and wallpaper-related env overrides that affect generated files."""
+    payload = {
+        "config": asdict(config),
+        "env": {
+            key: value
+            for key, value in sorted(os.environ.items())
+            if key.startswith("WALLPAPER_")
+        },
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return sha256(raw.encode("utf-8")).hexdigest()
+
+
+def build_cache_key(wallpaper_hash, config):
+    return f"{wallpaper_hash}:{config_signature(config)}"
 
 
 def main():
@@ -49,9 +70,10 @@ def main():
 
     # 2. Check if wallpaper actually changed (skip if identical)
     current_hash = image_hash(img)
+    current_cache_key = build_cache_key(current_hash, config)
     if not force and os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, "r") as f:
-            if f.read().strip() == current_hash:
+            if f.read().strip() == current_cache_key:
                 log("Unchanged, skipping")
                 return
 
@@ -86,7 +108,7 @@ def main():
         sys.exit(1)
 
     # 5. Save hash + wallpaper path
-    atomic_write(CACHE_FILE, current_hash)
+    atomic_write(CACHE_FILE, current_cache_key)
     if wp_path:
         atomic_write(LAST_WP_FILE, wp_path)
 

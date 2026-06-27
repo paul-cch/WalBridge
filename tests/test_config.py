@@ -17,6 +17,7 @@ class ConfigLoadTests(unittest.TestCase):
         cfg = Config.load("/tmp/does-not-exist-wallpaper-config.toml")
         self.assertEqual(cfg.display, 1)
         self.assertEqual(cfg.n_colors, 8)
+        self.assertFalse(cfg.targets["vscode"])
 
     def test_invalid_toml_falls_back_to_defaults(self):
         with tempfile.TemporaryDirectory() as td:
