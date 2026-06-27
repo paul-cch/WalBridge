@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Wallpaper Color Sync
+"""Wallpaper Color Sync CLI adapter.
 
 Extracts dominant colors from the macOS wallpaper and updates:
 - SketchyBar colors.sh
@@ -15,108 +15,25 @@ Usage:
     python3 wallpaper_colors.py [-v|--verbose] [-f|--force]
 """
 
-import json
-import os
-import subprocess
 import sys
-from dataclasses import asdict
-from hashlib import sha256
 
-from PIL import Image
-
-from wcsync.capture import DESKTOPPR, load_wallpaper
-from wcsync.colors import build_scheme, extract_palette, image_hash, sat, lum
-from wcsync.config import Config
-from wcsync.reloaders import reload_all
-from wcsync.target_apps import target_env_material
-from wcsync.utils import atomic_write, hexc, log
-from wcsync.writers import write_all
-
-CACHE_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_hash")
-LAST_WP_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_wp_path")
+from wcsync.sync_run import SyncRunError, SyncRunOptions, run_sync
 
 
-def config_signature(config):
-    """Hash config and target app env overrides that affect generated files."""
-    payload = {
-        "config": asdict(config),
-        "env": target_env_material(),
-    }
-    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    return sha256(raw.encode("utf-8")).hexdigest()
-
-
-def build_cache_key(wallpaper_hash, config):
-    return f"{wallpaper_hash}:{config_signature(config)}"
+def options_from_argv(argv):
+    return SyncRunOptions(
+        verbose="--verbose" in argv or "-v" in argv,
+        force="--force" in argv or "-f" in argv,
+    )
 
 
 def main():
-    verbose = "--verbose" in sys.argv or "-v" in sys.argv
-    force = "--force" in sys.argv or "-f" in sys.argv
-
-    config = Config.load()
-    log("Triggered")
-
-    # 1. Load wallpaper image
-    img, wp_path = load_wallpaper(config)
-    if img is None:
-        log("ERROR: Could not load wallpaper")
-        sys.exit(1)
-    if verbose:
-        log(f"Loaded wallpaper: {img.size[0]}x{img.size[1]} ({wp_path or 'capture'})")
-
-    # 2. Check if wallpaper actually changed (skip if identical)
-    current_hash = image_hash(img)
-    current_cache_key = build_cache_key(current_hash, config)
-    if not force and os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "r") as f:
-            if f.read().strip() == current_cache_key:
-                log("Unchanged, skipping")
-                return
-
-    # Resize once for downstream palette extraction
-    small = img.resize((200, 200), Image.Resampling.LANCZOS)
-
-    # 2b. Propagate wallpaper to all spaces (fixes Unsplash per-space bug)
-    if wp_path:
-        subprocess.run([DESKTOPPR, wp_path], capture_output=True)
-        if verbose:
-            log(f"Propagated wallpaper to all spaces: {wp_path}")
-
-    # 3. Extract & build scheme
-    palette = extract_palette(small, n_colors=config.n_colors)
-    scheme = build_scheme(palette, config)
-
-    if verbose:
-        print("Palette:")
-        for c in palette:
-            print(
-                f"  #{c[0]:02x}{c[1]:02x}{c[2]:02x}  sat={sat(*c):.2f} lum={lum(*c):.0f}"
-            )
-        print(f"Accent:    {hexc(*scheme['accent'])}")
-        print(f"Secondary: {hexc(*scheme['secondary'])}")
-        print(f"Dark:      {hexc(*scheme['dark'])}")
-        print(f"Light:     {hexc(*scheme['light'])}")
-
-    # 4. Write configs
-    failed_writers = write_all(scheme, config)
-    if failed_writers:
-        log(f"ERROR: writer failures ({', '.join(sorted(failed_writers))}); not caching")
-        sys.exit(1)
-
-    # 5. Save hash + wallpaper path
-    atomic_write(CACHE_FILE, current_cache_key)
-    if wp_path:
-        atomic_write(LAST_WP_FILE, wp_path)
-
-    # 6. Reload all services in parallel
-    reload_all(scheme, config)
-
-    ba = hexc(*scheme["border_accent"])
-    bi_rgb = scheme.get("border_inactive") or scheme.get("grey", scheme["border_accent"])
-    bi = hexc(*bi_rgb)
-    log(f"Synced: border={ba} inactive={bi} bar_accent={hexc(*scheme['accent'])}")
+    try:
+        run_sync(options_from_argv(sys.argv[1:]))
+    except SyncRunError:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
