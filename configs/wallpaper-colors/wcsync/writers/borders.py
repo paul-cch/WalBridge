@@ -1,18 +1,10 @@
 """JankyBorders border_colors writer."""
 
-import os
-
-from ..utils import atomic_write, hexc, safe_home_path
-
-DEFAULT_OUTPUT_PATH = "~/.config/wallpaper-colors/border_colors"
-
+from ..target_apps import target_path
+from ..utils import atomic_write, hexc
 
 def _output_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_BORDER_COLORS_FILE"),
-        DEFAULT_OUTPUT_PATH,
-        "WALLPAPER_BORDER_COLORS_FILE",
-    )
+    return target_path("borders")
 
 
 def write(scheme, config=None):

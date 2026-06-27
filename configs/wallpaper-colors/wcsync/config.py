@@ -5,27 +5,10 @@ import re
 import tomllib
 from dataclasses import dataclass, field
 
+from .target_apps import target_defaults
 from .utils import log
 
 CONFIG_PATH = os.path.expanduser("~/.config/wallpaper-colors/config.toml")
-
-_DEFAULT_TARGETS = {
-    "sketchybar": True,
-    "borders": True,
-    "kitty": True,
-    "wezterm": True,
-    "alacritty": True,
-    "ghostty": True,
-    "iterm2": True,
-    "tmux": True,
-    "btop": True,
-    "neovim": True,
-    "yazi": True,
-    "starship": True,
-    "opencode": True,
-    "hydrotodo": True,
-    "vscode": False,
-}
 
 
 def _as_int(value, default, min_value=None, max_value=None):
@@ -86,7 +69,7 @@ class Config:
     border_inactive_opacity: int = 0x66
 
     # Target toggles
-    targets: dict = field(default_factory=lambda: dict(_DEFAULT_TARGETS))
+    targets: dict = field(default_factory=target_defaults)
 
     @classmethod
     def load(cls, path=None):
@@ -123,7 +106,7 @@ class Config:
         if not isinstance(targets_raw, dict):
             targets_raw = {}
 
-        targets = dict(_DEFAULT_TARGETS)
+        targets = target_defaults()
         for key in targets:
             if key in targets_raw and isinstance(targets_raw[key], bool):
                 targets[key] = targets_raw[key]

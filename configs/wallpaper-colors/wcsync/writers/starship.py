@@ -2,26 +2,16 @@
 
 import os
 
-from ..utils import atomic_write, hex6, log, safe_home_path
-
-DEFAULT_OUTPUT_PATH = "~/.config/starship.toml"
-DEFAULT_FALLBACK_PATH = "~/.config/wallpaper-colors/starship.toml"
+from ..target_apps import target_path
+from ..utils import atomic_write, hex6, log
 
 
 def _output_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_STARSHIP_OUTPUT_PATH"),
-        DEFAULT_OUTPUT_PATH,
-        "WALLPAPER_STARSHIP_OUTPUT_PATH",
-    )
+    return target_path("starship")
 
 
 def _fallback_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_STARSHIP_FALLBACK_PATH"),
-        DEFAULT_FALLBACK_PATH,
-        "WALLPAPER_STARSHIP_FALLBACK_PATH",
-    )
+    return target_path("starship", "fallback")
 
 
 def write(scheme, config=None):

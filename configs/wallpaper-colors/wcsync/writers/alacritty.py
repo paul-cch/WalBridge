@@ -1,15 +1,10 @@
 """Alacritty theme writer."""
 
-import os
-
-from ..utils import atomic_write, hex6, safe_home_path
-
-DEFAULT_OUTPUT_PATH = "~/.config/alacritty/themes/wallpaper.toml"
-
+from ..target_apps import target_path
+from ..utils import atomic_write, hex6
 
 def _output_path():
-    override = os.environ.get("WALLPAPER_ALACRITTY_OUTPUT_PATH")
-    return safe_home_path(override, DEFAULT_OUTPUT_PATH, "WALLPAPER_ALACRITTY_OUTPUT_PATH")
+    return target_path("alacritty")
 
 
 def write(scheme, config=None):

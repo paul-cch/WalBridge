@@ -1,4 +1,4 @@
-"""Service reload functions — push new colors to running applications."""
+"""Hot reload functions — push new colors to running Target Apps."""
 
 import glob
 import os
@@ -7,7 +7,9 @@ import shutil
 import tempfile
 
 from .config import Config
+from .target_apps import enabled_target_apps, target_path
 from .utils import hexc, log
+
 
 def _find_bin(name):
     """Locate binary on PATH, falling back to common Homebrew locations."""
@@ -21,7 +23,7 @@ def _find_bin(name):
     return name  # let subprocess raise a descriptive FileNotFoundError
 
 
-def reload_sketchybar():
+def reload_sketchybar(scheme=None, config=None):
     """Reload SketchyBar config. Returns Popen for parallel wait."""
     return subprocess.Popen(
         [_find_bin("sketchybar"), "--reload"],
@@ -30,12 +32,10 @@ def reload_sketchybar():
     )
 
 
-def reload_kitty():
+def reload_kitty(scheme=None, config=None):
     """Live-reload Kitty colors via remote control. Returns list of Popen."""
-    from .writers.kitty import output_path
-
     procs = []
-    colors_path = output_path()
+    colors_path = target_path("kitty")
     for sock in glob.glob("/tmp/kitty-sock-*"):
         procs.append(
             subprocess.Popen(
@@ -56,7 +56,7 @@ def reload_kitty():
     return procs
 
 
-def reload_nvim():
+def reload_nvim(scheme=None, config=None):
     """Live-reload Neovim colors in all running instances. Returns list of Popen."""
     procs = []
     user = os.environ.get("USER", "")
@@ -79,10 +79,8 @@ def reload_nvim():
     return procs
 
 
-def reload_tmux():
+def reload_tmux(scheme=None, config=None):
     """Hot-reload tmux theme include when a tmux server is running."""
-    from .writers.tmux import output_path
-
     tmux_bin = _find_bin("tmux")
     has_session = subprocess.run(
         [tmux_bin, "list-sessions"],
@@ -94,7 +92,7 @@ def reload_tmux():
 
     return [
         subprocess.Popen(
-            [tmux_bin, "source-file", output_path()],
+            [tmux_bin, "source-file", target_path("tmux")],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -122,37 +120,20 @@ def reload_borders(scheme, config=None):
 
 
 def reload_all(scheme, config=None):
-    """Reload all enabled services in parallel.
+    """Hot-reload all enabled Target Apps in parallel.
 
     Returns after all child processes have finished.
     """
     if config is None:
         config = Config()
 
-    targets = config.targets
     procs = []
-
-    reloaders = []
-    if targets.get("sketchybar", True):
-        reloaders.append(("sketchybar", lambda: [reload_sketchybar()]))
-    if targets.get("kitty", True):
-        reloaders.append(("kitty", lambda: reload_kitty()))
-    if targets.get("neovim", True):
-        reloaders.append(("neovim", lambda: reload_nvim()))
-    if targets.get("tmux", True):
-        reloaders.append(("tmux", lambda: reload_tmux()))
-    if targets.get("borders", True):
-        reloaders.append(("borders", lambda s=scheme, c=config: [reload_borders(s, c)]))
-
-    for name, fn in reloaders:
+    for app in enabled_target_apps(config):
         try:
-            procs.extend(fn())
+            procs.extend(app.reload(scheme, config))
         except FileNotFoundError as e:
-            log(f"Skipping {name} reload: {e}")
+            log(f"Skipping {app.name} reload: {e}")
 
-    # Yazi, Starship, OpenCode, HydroTodo, WezTerm, Alacritty, Ghostty,
-    # iTerm2, btop — no direct hot-reload here; applied on next
-    # launch/reload/prompt. tmux is hot-reloaded when a server exists.
     for p in procs:
         try:
             p.wait(timeout=5)

@@ -1,27 +1,14 @@
 """iTerm2 color preset writer."""
 
-import os
-
-from ..utils import atomic_write, safe_home_path, sanitize_name
-
-DEFAULT_PRESET_NAME = "wallpaper"
-
+from ..target_apps import target_name, target_path
+from ..utils import atomic_write
 
 def _preset_name():
-    return sanitize_name(
-        os.environ.get("WALLPAPER_ITERM_PRESET_NAME"),
-        DEFAULT_PRESET_NAME,
-        "WALLPAPER_ITERM_PRESET_NAME",
-    )
+    return target_name("iterm2", "preset")
 
 
 def _output_path():
-    default_path = f"~/.config/iterm2/colors/{_preset_name()}.itermcolors"
-    return safe_home_path(
-        os.environ.get("WALLPAPER_ITERM_OUTPUT_PATH"),
-        default_path,
-        "WALLPAPER_ITERM_OUTPUT_PATH",
-    )
+    return target_path("iterm2")
 
 
 def _plist_color(name, rgb, alpha=1.0):

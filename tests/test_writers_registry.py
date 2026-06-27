@@ -13,9 +13,9 @@ from wcsync.config import Config
 from wcsync import writers
 
 
-class _WriterModule:
+class _TargetApp:
     def __init__(self, name, fn):
-        self.__name__ = name
+        self.name = name
         self._fn = fn
 
     def write(self, scheme, config):
@@ -25,11 +25,10 @@ class _WriterModule:
 class WritersRegistryTests(unittest.TestCase):
     def test_write_all_respects_target_toggles(self):
         called = []
-        mod_a = _WriterModule("wcsync.writers.a", lambda *_: called.append("a"))
-        mod_b = _WriterModule("wcsync.writers.b", lambda *_: called.append("b"))
-        cfg = Config(targets={"a": True, "b": False})
+        app_a = _TargetApp("a", lambda *_: called.append("a"))
+        cfg = Config(targets={"a": True})
 
-        with patch.object(writers, "_WRITERS", {"a": mod_a, "b": mod_b}):
+        with patch.object(writers, "enabled_target_apps", return_value=[app_a]):
             failed = writers.write_all({"accent": (1, 2, 3)}, cfg)
 
         self.assertEqual(called, ["a"])
@@ -41,12 +40,12 @@ class WritersRegistryTests(unittest.TestCase):
         def fail(*_):
             raise RuntimeError("bad writer")
 
-        mod_bad = _WriterModule("wcsync.writers.bad", fail)
-        mod_ok = _WriterModule("wcsync.writers.ok", lambda *_: called.append("ok"))
+        app_bad = _TargetApp("bad", fail)
+        app_ok = _TargetApp("ok", lambda *_: called.append("ok"))
         cfg = Config(targets={"bad": True, "ok": True})
 
         with (
-            patch.object(writers, "_WRITERS", {"bad": mod_bad, "ok": mod_ok}),
+            patch.object(writers, "enabled_target_apps", return_value=[app_bad, app_ok]),
             patch("wcsync.writers.log") as log_mock,
         ):
             failed = writers.write_all({"accent": (1, 2, 3)}, cfg)

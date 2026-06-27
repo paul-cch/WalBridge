@@ -19,7 +19,8 @@
 
 ## Adding a New Target App
 
-The project uses a writer/reloader registry pattern. Adding support for a new app takes 4 steps:
+`wcsync/target_apps.py` is the single source of truth for Target App defaults,
+path policy, writer adapters, and hot reload capability.
 
 ### 1. Create a writer module
 
@@ -28,11 +29,8 @@ Create `configs/wallpaper-colors/wcsync/writers/myapp.py`:
 ```python
 """MyApp theme writer."""
 
-import os
-
+from ..target_apps import target_path
 from ..utils import atomic_write, hex6
-
-OUTPUT_PATH = os.path.expanduser("~/.config/myapp/theme.conf")
 
 
 def write(scheme, config=None):
@@ -41,20 +39,24 @@ accent = {hex6(*scheme["accent"])}
 background = {hex6(*scheme["dark"])}
 foreground = {hex6(*scheme["light"])}
 """
-    atomic_write(OUTPUT_PATH, content)
+    atomic_write(target_path("myapp"), content)
 ```
 
-### 2. Register the writer
+### 2. Add Target App metadata
 
-In `configs/wallpaper-colors/wcsync/writers/__init__.py`, add:
+In `configs/wallpaper-colors/wcsync/target_apps.py`, add:
 
 ```python
-from . import myapp
-
-_WRITERS = {
-    ...
-    "myapp": myapp,
-}
+TargetApp(
+    "myapp",
+    "myapp",
+    paths={
+        "output": PathPolicy(
+            "~/.config/myapp/theme.conf",
+            "WALLPAPER_MYAPP_OUTPUT_PATH",
+        )
+    },
+)
 ```
 
 ### 3. Add a reload function (optional)
@@ -62,26 +64,20 @@ _WRITERS = {
 If the app supports hot-reload, add to `configs/wallpaper-colors/wcsync/reloaders.py`:
 
 ```python
-def reload_myapp():
+def reload_myapp(scheme=None, config=None):
     return subprocess.Popen(
         [_find_bin("myapp"), "--reload"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-    )
+)
 ```
 
-And register it in `reload_all()`.
+Then set `reload_function="reload_myapp"` on the Target App metadata.
 
-### 4. Add a config toggle
+### 4. Add tests
 
-In `configs/wallpaper-colors/wcsync/config.py`, add to `_DEFAULT_TARGETS`:
-
-```python
-_DEFAULT_TARGETS = {
-    ...
-    "myapp": True,
-}
-```
+Add metadata/path coverage in `tests/test_target_apps.py` and writer output
+coverage in `tests/test_writer_paths.py`.
 
 ## Project Structure
 
@@ -93,7 +89,8 @@ configs/wallpaper-colors/
 │   ├── capture.py           # Wallpaper image capture
 │   ├── colors.py            # Palette extraction + scheme generation
 │   ├── config.py            # Config dataclass + TOML loading
-│   ├── writers/             # Per-app config writers (registry pattern)
+│   ├── target_apps.py       # Target App defaults, paths, writers, reloaders
+│   ├── writers/             # Per-app config writers
 │   └── reloaders.py         # Per-app reload functions
 tools/
 ├── wallpaper-faded.swift    # Persistent transition daemon

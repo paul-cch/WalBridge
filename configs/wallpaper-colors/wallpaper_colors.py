@@ -28,6 +28,7 @@ from wcsync.capture import DESKTOPPR, load_wallpaper
 from wcsync.colors import build_scheme, extract_palette, image_hash, sat, lum
 from wcsync.config import Config
 from wcsync.reloaders import reload_all
+from wcsync.target_apps import target_env_material
 from wcsync.utils import atomic_write, hexc, log
 from wcsync.writers import write_all
 
@@ -36,14 +37,10 @@ LAST_WP_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_wp_path")
 
 
 def config_signature(config):
-    """Hash config and wallpaper-related env overrides that affect generated files."""
+    """Hash config and target app env overrides that affect generated files."""
     payload = {
         "config": asdict(config),
-        "env": {
-            key: value
-            for key, value in sorted(os.environ.items())
-            if key.startswith("WALLPAPER_")
-        },
+        "env": target_env_material(),
     }
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return sha256(raw.encode("utf-8")).hexdigest()

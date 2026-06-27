@@ -1,27 +1,14 @@
 """WezTerm color scheme writer."""
 
-import os
-
-from ..utils import atomic_write, hex6, safe_home_path, sanitize_name
-
-DEFAULT_SCHEME_NAME = "wallpaper"
-
+from ..target_apps import target_name, target_path
+from ..utils import atomic_write, hex6
 
 def _scheme_name():
-    return sanitize_name(
-        os.environ.get("WALLPAPER_WEZTERM_SCHEME_NAME"),
-        DEFAULT_SCHEME_NAME,
-        "WALLPAPER_WEZTERM_SCHEME_NAME",
-    )
+    return target_name("wezterm", "scheme")
 
 
 def _output_path():
-    default_path = f"~/.config/wezterm/colors/{_scheme_name()}.toml"
-    return safe_home_path(
-        os.environ.get("WALLPAPER_WEZTERM_OUTPUT_PATH"),
-        default_path,
-        "WALLPAPER_WEZTERM_OUTPUT_PATH",
-    )
+    return target_path("wezterm")
 
 
 def write(scheme, config=None):

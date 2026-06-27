@@ -10,9 +10,9 @@ import os
 import re
 
 from ..colors import lighten
-from ..utils import atomic_write, clamp, hex6, log, safe_home_path
+from ..target_apps import target_path
+from ..utils import atomic_write, clamp, hex6, log
 
-DEFAULT_SETTINGS_PATH = "~/Library/Application Support/Code/User/settings.json"
 RULE_NAME_PREFIX = "WalBridge "
 
 
@@ -30,11 +30,7 @@ def _syntax(rgb, max_sat=0.60, min_val=0.70, max_val=0.92):
 
 
 def _settings_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_VSCODE_SETTINGS_PATH"),
-        DEFAULT_SETTINGS_PATH,
-        "WALLPAPER_VSCODE_SETTINGS_PATH",
-    )
+    return target_path("vscode", "settings")
 
 
 def _strip_jsonc(text):

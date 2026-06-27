@@ -2,42 +2,26 @@
 
 import os
 
-from ..utils import atomic_write, hex6, log, safe_home_path, sanitize_name
+from ..target_apps import target_flag, target_name, target_path
+from ..utils import atomic_write, hex6, log
 
-DEFAULT_FLAVOR_NAME = "wallpaper"
-DEFAULT_THEME_PATH = "~/.config/yazi/theme.toml"
 YAZI_THEME_MARKER = "# Auto-generated from wallpaper"
 
 
 def _flavor_name():
-    return sanitize_name(
-        os.environ.get("WALLPAPER_YAZI_FLAVOR_NAME"),
-        DEFAULT_FLAVOR_NAME,
-        "WALLPAPER_YAZI_FLAVOR_NAME",
-    )
+    return target_name("yazi", "flavor")
 
 
 def _output_path():
-    flavor_name = _flavor_name()
-    default_path = f"~/.config/yazi/flavors/{flavor_name}.yazi/flavor.toml"
-    return safe_home_path(
-        os.environ.get("WALLPAPER_YAZI_OUTPUT_PATH"),
-        default_path,
-        "WALLPAPER_YAZI_OUTPUT_PATH",
-    )
+    return target_path("yazi")
 
 
 def _theme_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_YAZI_THEME_PATH"),
-        DEFAULT_THEME_PATH,
-        "WALLPAPER_YAZI_THEME_PATH",
-    )
+    return target_path("yazi", "theme")
 
 
 def _should_write_selector():
-    raw = os.environ.get("WALLPAPER_YAZI_WRITE_THEME_SELECTOR", "1").strip().lower()
-    return raw not in {"0", "false", "no", "off"}
+    return target_flag("yazi", "write_theme_selector")
 
 
 def _write_theme_selector():
@@ -59,7 +43,7 @@ light = "{flavor_name}"
             with open(target, "r", encoding="utf-8") as f:
                 first_line = f.readline()
                 if YAZI_THEME_MARKER not in first_line:
-                    alt = safe_home_path(None, "~/.config/wallpaper-colors/yazi.theme.toml")
+                    alt = target_path("yazi", "theme_fallback")
                     atomic_write(alt, content)
                     log(f"Yazi: user theme.toml detected, wrote selector to {alt}")
                     return

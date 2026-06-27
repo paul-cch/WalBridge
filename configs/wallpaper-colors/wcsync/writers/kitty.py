@@ -1,19 +1,12 @@
 """Kitty terminal theme writer."""
 
-import os
-
 from ..colors import darken, lighten
-from ..utils import atomic_write, hex6, safe_home_path
-
-DEFAULT_OUTPUT_PATH = "~/.config/kitty/themes/wallpaper.conf"
+from ..target_apps import target_path
+from ..utils import atomic_write, hex6
 
 
 def _output_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_KITTY_OUTPUT_PATH"),
-        DEFAULT_OUTPUT_PATH,
-        "WALLPAPER_KITTY_OUTPUT_PATH",
-    )
+    return target_path("kitty")
 
 
 def output_path():

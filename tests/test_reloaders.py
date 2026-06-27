@@ -61,7 +61,7 @@ class ReloadersTests(unittest.TestCase):
                 "wcsync.reloaders.subprocess.run",
                 return_value=subprocess.CompletedProcess(args=[], returncode=0),
             ),
-            patch("wcsync.writers.tmux.output_path", return_value="/tmp/wallpaper.conf"),
+            patch("wcsync.reloaders.target_path", return_value="/tmp/wallpaper.conf"),
             patch("wcsync.reloaders.subprocess.Popen", return_value=fake_proc) as popen_mock,
         ):
             procs = reloaders.reload_tmux()
@@ -79,7 +79,7 @@ class ReloadersTests(unittest.TestCase):
         with (
             patch("wcsync.reloaders.glob.glob", return_value=["/tmp/kitty-sock-a", "/tmp/kitty-sock-b"]),
             patch("wcsync.reloaders._find_bin", return_value="/usr/bin/kitten"),
-            patch("wcsync.writers.kitty.output_path", return_value="/tmp/wallpaper.conf"),
+            patch("wcsync.reloaders.target_path", return_value="/tmp/wallpaper.conf"),
             patch("wcsync.reloaders.subprocess.Popen", side_effect=[p1, p2]) as popen_mock,
         ):
             procs = reloaders.reload_kitty()

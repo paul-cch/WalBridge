@@ -1,19 +1,13 @@
 """HydroToDo TUI theme writer."""
 
 import json
-import os
 
-from ..utils import atomic_write, safe_home_path
-
-DEFAULT_OUTPUT_PATH = "~/.config/wallpaper-colors/hydrotodo_colors.json"
+from ..target_apps import target_path
+from ..utils import atomic_write
 
 
 def _output_path():
-    return safe_home_path(
-        os.environ.get("WALLPAPER_HYDROTODO_OUTPUT_PATH"),
-        DEFAULT_OUTPUT_PATH,
-        "WALLPAPER_HYDROTODO_OUTPUT_PATH",
-    )
+    return target_path("hydrotodo")
 
 
 def write(scheme, config=None):

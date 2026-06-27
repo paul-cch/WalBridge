@@ -148,8 +148,9 @@ configs/wallpaper-colors/
 │   ├── capture.py               # Wallpaper capture (file + CGWindow + multi-monitor)
 │   ├── colors.py                # Color extraction + scheme generation
 │   ├── config.py                # Config dataclass + TOML loading
+│   ├── target_apps.py           # Target App defaults, path policy, writer/reload adapters
 │   ├── writers/
-│   │   ├── __init__.py          # write_all dispatch + registry
+│   │   ├── __init__.py          # write_all dispatch
 │   │   ├── sketchybar.py
 │   │   ├── borders.py
 │   │   ├── kitty.py
@@ -169,10 +170,10 @@ configs/wallpaper-colors/
 ```
 
 **Adding a new target app**:
-1. Create `wcsync/writers/newapp.py` with `write(scheme, config)` and `OUTPUT_PATH`
-2. Register in `wcsync/writers/__init__.py`
-3. Add reload function in `wcsync/reloaders.py` if hot-reload is supported
-4. Add toggle to `config.py` `_DEFAULT_TARGETS`
+1. Create `wcsync/writers/newapp.py` with `write(scheme, config)`
+2. Add Target App metadata in `wcsync/target_apps.py` (default enabled state, paths, env overrides, writer module)
+3. Add a reload function in `wcsync/reloaders.py` only if hot reload is supported, then reference it from the Target App metadata
+4. Add tests for target metadata and generated output paths
 
 **Color scheme generation**:
 - **Accent** = most vibrant palette color (highest `saturation * weighted_luminance`), or manual override via `accent_override` in config
@@ -370,8 +371,9 @@ walbridge/
 │   │   ├── capture.py           # Wallpaper capture + multi-monitor
 │   │   ├── colors.py            # Color extraction + scheme
 │   │   ├── config.py            # Config loading
+│   │   ├── target_apps.py       # Target App metadata and policy
 │   │   ├── writers/             # Per-app config writers
-│   │   └── reloaders.py         # Service reload functions
+│   │   └── reloaders.py         # Hot reload functions
 │   ├── setup-targets.sh         # One-time target integration helper
 │   ├── wallpaper_cycle.sh       # Theme-aware wallpaper cycler
 │   └── borders-cycle.sh         # Borders startup (solid accent color)
@@ -393,6 +395,7 @@ walbridge/
 │   ├── capture.py
 │   ├── colors.py
 │   ├── config.py
+│   ├── target_apps.py
 │   ├── writers/
 │   └── reloaders.py
 ├── config.toml                  # User config (optional)

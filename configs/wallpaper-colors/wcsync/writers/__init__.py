@@ -1,46 +1,11 @@
-"""Writer registry — dispatches write_all to individual target writers."""
+"""Dispatch write_all to enabled Target App writer adapters."""
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..config import Config
+from ..target_apps import enabled_target_apps
 from ..utils import log
 
-from . import (
-    alacritty,
-    btop,
-    borders,
-    ghostty,
-    hydrotodo,
-    iterm2,
-    kitty,
-    neovim,
-    opencode,
-    sketchybar,
-    starship,
-    tmux,
-    vscode,
-    wezterm,
-    yazi,
-)
-
-# Registry: target name → module (must have a `write(scheme, config)` function)
-_WRITERS = {
-    "sketchybar": sketchybar,
-    "borders": borders,
-    "kitty": kitty,
-    "wezterm": wezterm,
-    "alacritty": alacritty,
-    "ghostty": ghostty,
-    "iterm2": iterm2,
-    "tmux": tmux,
-    "btop": btop,
-    "neovim": neovim,
-    "yazi": yazi,
-    "starship": starship,
-    "opencode": opencode,
-    "hydrotodo": hydrotodo,
-    "vscode": vscode,
-}
 
 def write_all(scheme, config=None):
     """Write all enabled config files.
@@ -51,24 +16,22 @@ def write_all(scheme, config=None):
     if config is None:
         config = Config()
 
-    enabled = [(name, mod) for name, mod in _WRITERS.items() if config.targets.get(name, True)]
-    written = set()
+    enabled = enabled_target_apps(config)
+    written = []
     failed = []
 
     if enabled:
         with ThreadPoolExecutor(max_workers=min(8, len(enabled))) as pool:
-            futures = {pool.submit(mod.write, scheme, config): (name, mod) for name, mod in enabled}
+            futures = {pool.submit(app.write, scheme, config): app for app in enabled}
             for fut in as_completed(futures):
-                name, mod = futures[fut]
+                app = futures[fut]
                 try:
                     fut.result()
                 except Exception as e:
-                    log(f"Writer {name} failed: {e}")
-                    failed.append(name)
+                    log(f"Writer {app.name} failed: {e}")
+                    failed.append(app.name)
                     continue
-                written.add(mod)
+                written.append(app.name)
 
-    log(
-        f"Wrote configs for: {', '.join(sorted(m.__name__.rsplit('.', 1)[-1] for m in written))}"
-    )
+    log(f"Wrote configs for: {', '.join(sorted(written))}")
     return failed
