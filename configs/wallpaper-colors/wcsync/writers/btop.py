@@ -1,17 +1,10 @@
 """btop theme writer."""
 
-from ..target_apps import target_name, target_path
-from ..utils import atomic_write, hex6
-
-def _theme_name():
-    return target_name("btop", "theme")
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def _output_path():
-    return target_path("btop")
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     dark = hex6(*scheme["dark"])
     light = hex6(*scheme["light"])
     accent = hex6(*scheme["accent"])
@@ -72,4 +65,4 @@ theme[process_start]="{accent}"
 theme[process_mid]="{secondary}"
 theme[process_end]="{pink}"
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

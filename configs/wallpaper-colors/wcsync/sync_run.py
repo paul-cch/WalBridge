@@ -18,9 +18,9 @@ from .capture import DESKTOPPR, load_wallpaper
 from .colors import build_scheme, extract_palette, image_hash, lum, sat
 from .config import Config
 from .reloaders import reload_all
+from .target_writing import write_all
 from .target_apps import target_env_material
 from .utils import atomic_write, hexc, log
-from .writers import write_all
 
 CACHE_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_hash")
 LAST_WP_FILE = os.path.expanduser("~/.config/wallpaper-colors/.last_wp_path")

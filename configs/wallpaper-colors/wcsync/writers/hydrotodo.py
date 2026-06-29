@@ -2,15 +2,10 @@
 
 import json
 
-from ..target_apps import target_path
-from ..utils import atomic_write
+from ..target_writing import ColorMaterial
 
 
-def _output_path():
-    return target_path("hydrotodo")
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     theme = {
         "accent": list(scheme["accent"]),
         "green": list(scheme["green"]),
@@ -23,4 +18,4 @@ def write(scheme, config=None):
         "dark": list(scheme["dark"]),
         "light": list(scheme["light"]),
     }
-    atomic_write(_output_path(), json.dumps(theme) + "\n")
+    return ColorMaterial(json.dumps(theme) + "\n")

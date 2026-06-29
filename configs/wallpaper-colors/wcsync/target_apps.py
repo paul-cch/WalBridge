@@ -1,7 +1,7 @@
 """Target App module and policy.
 
 This module is the single source of truth for apps WalBridge can generate
-color material for: defaults, writer adapters, hot reload capability, and
+Color Material for: defaults, adapter module names, hot reload capability, and
 environment-derived path/name policy.
 """
 
@@ -69,10 +69,6 @@ class TargetApp:
     paths: dict[str, PathPolicy] = field(default_factory=dict)
     names: dict[str, NamePolicy] = field(default_factory=dict)
     bools: dict[str, BoolPolicy] = field(default_factory=dict)
-
-    def write(self, scheme, config=None):
-        module = importlib.import_module(f"{__package__}.writers.{self.writer_module}")
-        module.write(scheme, config)
 
     def reload(self, scheme, config=None):
         if not self.reload_function:
