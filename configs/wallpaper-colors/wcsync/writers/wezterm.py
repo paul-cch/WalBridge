@@ -1,17 +1,10 @@
 """WezTerm color scheme writer."""
 
-from ..target_apps import target_name, target_path
-from ..utils import atomic_write, hex6
-
-def _scheme_name():
-    return target_name("wezterm", "scheme")
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def _output_path():
-    return target_path("wezterm")
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     dark = hex6(*scheme["dark"])
     light = hex6(*scheme["light"])
     accent = hex6(*scheme["accent"])
@@ -30,7 +23,7 @@ def write(scheme, config=None):
 # Regenerate: python3 ~/.config/wallpaper-colors/wallpaper_colors.py
 
 [metadata]
-name = "{_scheme_name()}"
+name = "{app.target_name("scheme")}"
 
 [colors]
 foreground = "{light}"
@@ -61,4 +54,4 @@ brights = [
   "{light}",
 ]
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

@@ -1,13 +1,10 @@
 """SketchyBar colors.sh writer."""
 
-from ..target_apps import target_path
-from ..utils import atomic_write, hexc
-
-def _output_path():
-    return target_path("sketchybar")
+from ..target_writing import ColorMaterial
+from ..utils import hexc
 
 
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     content = f"""#!/bin/bash
 # Auto-generated from wallpaper — do not edit manually
 # Regenerate: python3 ~/.config/wallpaper-colors/wallpaper_colors.py
@@ -32,4 +29,4 @@ export ACCENT_COLOR=$BLUE
 export ACTIVE_COLOR=$BLUE
 export BLUE_VIVID={hexc(*scheme["border_accent"])}
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

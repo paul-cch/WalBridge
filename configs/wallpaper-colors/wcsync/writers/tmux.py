@@ -1,17 +1,10 @@
 """tmux theme include writer."""
 
-from ..target_apps import target_path
-from ..utils import atomic_write, hex6
-
-def _output_path():
-    return target_path("tmux")
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def output_path():
-    return _output_path()
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     dark = hex6(*scheme["dark"])
     light = hex6(*scheme["light"])
     accent = hex6(*scheme["accent"])
@@ -44,4 +37,4 @@ set -g window-status-bell-style "bold,fg={dark},bg={red}"
 set -g status-left-style "fg={dark},bg={accent}"
 set -g status-right-style "fg={dark},bg={secondary}"
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)
