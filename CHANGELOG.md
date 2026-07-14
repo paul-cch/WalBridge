@@ -16,6 +16,7 @@ All notable changes to this project are documented in this file.
 - CI shell syntax checks and Python unit test workflow.
 
 ### Changed
+- CI now uses the current stable major releases of `actions/checkout` and `actions/setup-python`.
 - Project renamed to `WalBridge` (formerly `wallpaper-theme-sync`), with default launchd prefix now `com.walbridge`.
 - `tmux` target now hot-reloads automatically when a tmux server is running.
 - Installer supports `--setup-targets` for one-time `tmux`/`btop`/`iTerm2` wiring.
