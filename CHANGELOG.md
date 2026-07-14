@@ -26,5 +26,6 @@ All notable changes to this project are documented in this file.
 - Theme watcher startup and wallpaper cycling now avoid first-run double-cycle races.
 
 ### Security
+- Raised the minimum Pillow version to `12.2.0` to exclude vulnerable releases.
 - Path overrides in setup/install flows are validated and constrained to the current user home.
 - LaunchAgent plist rendering now XML-escapes substituted install paths.
