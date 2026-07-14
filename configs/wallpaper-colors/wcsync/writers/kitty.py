@@ -1,19 +1,11 @@
 """Kitty terminal theme writer."""
 
 from ..colors import darken, lighten
-from ..target_apps import target_path
-from ..utils import atomic_write, hex6
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def _output_path():
-    return target_path("kitty")
-
-
-def output_path():
-    return _output_path()
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     bg = scheme["dark"]
     fg = scheme["light"]
     accent = scheme["accent"]
@@ -54,4 +46,4 @@ active_tab_background   {hex6(*sel_bg)}
 inactive_tab_foreground {hex6(*scheme["grey"])}
 inactive_tab_background {hex6(*darken(bg, 0.7))}
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

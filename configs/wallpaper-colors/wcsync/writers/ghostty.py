@@ -1,17 +1,10 @@
 """Ghostty theme writer."""
 
-from ..target_apps import target_name, target_path
-from ..utils import atomic_write, hex6
-
-def _theme_file():
-    return target_name("ghostty", "theme_file")
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def _output_path():
-    return target_path("ghostty")
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     dark = hex6(*scheme["dark"])
     light = hex6(*scheme["light"])
     accent = hex6(*scheme["accent"])
@@ -53,4 +46,4 @@ palette = 13={pink}
 palette = 14={secondary}
 palette = 15={light}
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

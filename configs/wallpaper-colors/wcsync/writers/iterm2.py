@@ -1,14 +1,6 @@
 """iTerm2 color preset writer."""
 
-from ..target_apps import target_name, target_path
-from ..utils import atomic_write
-
-def _preset_name():
-    return target_name("iterm2", "preset")
-
-
-def _output_path():
-    return target_path("iterm2")
+from ..target_writing import ColorMaterial
 
 
 def _plist_color(name, rgb, alpha=1.0):
@@ -28,7 +20,7 @@ def _plist_color(name, rgb, alpha=1.0):
   </dict>"""
 
 
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     dark = scheme["dark"]
     light = scheme["light"]
     accent = scheme["accent"]
@@ -82,4 +74,4 @@ def write(scheme, config=None):
 </dict>
 </plist>
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

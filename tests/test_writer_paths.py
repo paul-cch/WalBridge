@@ -12,8 +12,8 @@ import sys
 
 sys.path.insert(0, str(WCSYNC_ROOT))
 
-from wcsync.writers import alacritty, borders, btop, ghostty, iterm2, tmux, vscode, wezterm, yazi
-from wcsync.writers import hydrotodo, kitty, neovim, opencode, sketchybar, starship
+from wcsync import target_apps, target_writing
+from wcsync.writers import neovim, starship, vscode, yazi
 
 
 SCHEME = {
@@ -37,6 +37,9 @@ SCHEME = {
 
 
 class WriterPathOverrideTests(unittest.TestCase):
+    def write_target_app(self, name):
+        return target_writing.write_target_app(target_apps.target_app(name), SCHEME)
+
     def test_sketchybar_writer_respects_output_override(self):
         with tempfile.TemporaryDirectory() as td:
             home = pathlib.Path(td)
@@ -49,7 +52,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                sketchybar.write(SCHEME)
+                self.write_target_app("sketchybar")
 
             self.assertTrue(out_path.is_file())
             self.assertIn("export BLUE=", out_path.read_text(encoding="utf-8"))
@@ -66,7 +69,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                kitty.write(SCHEME)
+                self.write_target_app("kitty")
 
             self.assertTrue(out_path.is_file())
             self.assertIn("background #", out_path.read_text(encoding="utf-8"))
@@ -144,7 +147,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                opencode.write(SCHEME)
+                self.write_target_app("opencode")
 
             self.assertTrue(out_path.is_file())
             self.assertIn('"$schema"', out_path.read_text(encoding="utf-8"))
@@ -161,7 +164,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                hydrotodo.write(SCHEME)
+                self.write_target_app("hydrotodo")
 
             self.assertTrue(out_path.is_file())
             self.assertIn('"accent"', out_path.read_text(encoding="utf-8"))
@@ -178,7 +181,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                borders.write(SCHEME)
+                self.write_target_app("borders")
 
             self.assertTrue(out_path.is_file())
             text = out_path.read_text(encoding="utf-8")
@@ -274,7 +277,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                wezterm.write(SCHEME)
+                self.write_target_app("wezterm")
 
             self.assertTrue(expected.is_file())
             self.assertIn('name = "sunset"', expected.read_text(encoding="utf-8"))
@@ -291,7 +294,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                alacritty.write(SCHEME)
+                self.write_target_app("alacritty")
 
             self.assertTrue(out_path.is_file())
             self.assertIn("[colors.primary]", out_path.read_text(encoding="utf-8"))
@@ -308,7 +311,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                ghostty.write(SCHEME)
+                self.write_target_app("ghostty")
 
             self.assertTrue(out_path.is_file())
             text = out_path.read_text(encoding="utf-8")
@@ -327,7 +330,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                iterm2.write(SCHEME)
+                self.write_target_app("iterm2")
 
             self.assertTrue(out_path.is_file())
             text = out_path.read_text(encoding="utf-8")
@@ -346,7 +349,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                tmux.write(SCHEME)
+                self.write_target_app("tmux")
 
             self.assertTrue(out_path.is_file())
             text = out_path.read_text(encoding="utf-8")
@@ -365,7 +368,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                btop.write(SCHEME)
+                self.write_target_app("btop")
 
             self.assertTrue(expected.is_file())
             self.assertIn('theme[main_bg]="#', expected.read_text(encoding="utf-8"))
@@ -383,7 +386,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                borders.write(SCHEME)
+                self.write_target_app("borders")
 
             self.assertFalse(outside_path.exists())
             self.assertTrue(expected.is_file())
@@ -400,7 +403,7 @@ class WriterPathOverrideTests(unittest.TestCase):
                 },
                 clear=False,
             ):
-                btop.write(SCHEME)
+                self.write_target_app("btop")
 
             self.assertTrue(expected.is_file())
 

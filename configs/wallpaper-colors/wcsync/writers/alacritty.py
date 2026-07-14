@@ -1,13 +1,10 @@
 """Alacritty theme writer."""
 
-from ..target_apps import target_path
-from ..utils import atomic_write, hex6
-
-def _output_path():
-    return target_path("alacritty")
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     dark = hex6(*scheme["dark"])
     light = hex6(*scheme["light"])
     accent = hex6(*scheme["accent"])
@@ -57,4 +54,4 @@ cursor = "{accent}"
 text = "{light}"
 background = "{secondary}"
 """
-    atomic_write(_output_path(), content)
+    return ColorMaterial(content)

@@ -3,15 +3,11 @@
 import json
 
 from ..colors import darken, vivify
-from ..target_apps import target_path
-from ..utils import atomic_write, hex6
+from ..target_writing import ColorMaterial
+from ..utils import hex6
 
 
-def _output_path():
-    return target_path("opencode")
-
-
-def write(scheme, config=None):
+def render(scheme, app, config=None):
     fg = hex6(*scheme["light"])
     grey = hex6(*scheme["grey"])
     sel_bg = hex6(*scheme["item_bg"])
@@ -86,4 +82,4 @@ def write(scheme, config=None):
             "syntaxPunctuation": grey,
         },
     }
-    atomic_write(_output_path(), json.dumps(theme, indent=2) + "\n")
+    return ColorMaterial(json.dumps(theme, indent=2) + "\n")
