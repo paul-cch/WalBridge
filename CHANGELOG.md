@@ -17,5 +17,5 @@ All notable changes to this project are documented in this file.
 - Target App path policy, output writes, fallbacks, failure reporting, and Sync Run orchestration now use shared modules.
 
 ### Security
-- Raised the minimum Pillow version to `12.2.0` to exclude vulnerable releases.
+- Raised the minimum Pillow version to `12.3.0` to exclude releases affected by [CVE-2026-54059](https://osv.dev/vulnerability/PYSEC-2026-2253), [CVE-2026-54060](https://osv.dev/vulnerability/PYSEC-2026-2254), [CVE-2026-55379](https://osv.dev/vulnerability/PYSEC-2026-2255), [CVE-2026-55380](https://osv.dev/vulnerability/PYSEC-2026-2256), and [CVE-2026-55798](https://osv.dev/vulnerability/PYSEC-2026-2257).
 - LaunchAgent plist rendering now XML-escapes substituted install paths.
