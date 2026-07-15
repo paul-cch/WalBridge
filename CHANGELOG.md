@@ -5,28 +5,17 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
-- New target writers for `iTerm2`, `tmux`, and `btop`.
-- New target writers for `WezTerm`, `Alacritty`, and `Ghostty`.
-- Improved Yazi flavor handling with safer theme selector behavior.
-- One-time setup helper: `configs/wallpaper-colors/setup-targets.sh`.
-- Governance docs: `CODE_OF_CONDUCT.md` and `SECURITY.md`.
-- GitHub contribution templates: issue forms and pull request template.
-- Path/name overrides for borders, Yazi, WezTerm, Alacritty, Ghostty, iTerm2, tmux, and btop.
-- Unit tests for writer path overrides and tmux reload behavior.
-- CI shell syntax checks and Python unit test workflow.
+- GitHub Pages project site.
+- Opt-in VS Code token-color syncing that preserves existing user TextMate rules.
+- CI coverage for sandboxed macOS installs and Swift runtime startup.
 
 ### Changed
 - CI now uses the current stable major releases of `actions/checkout` and `actions/setup-python`.
-- Project renamed to `WalBridge` (formerly `wallpaper-theme-sync`), with default launchd prefix now `com.walbridge`.
-- `tmux` target now hot-reloads automatically when a tmux server is running.
-- Installer supports `--setup-targets` for one-time `tmux`/`btop`/`iTerm2` wiring.
-- Launchd templates and install flow are now prefix-configurable for public reuse.
-- Borders now use a stronger active accent and a muted inactive color derived from wallpaper.
+- Wallpaper colors now reapply after display configuration changes.
 - Wallpaper sync cache now invalidates when config or `WALLPAPER_*` overrides change.
-- VS Code token-color syncing is opt-in and preserves existing user TextMate rules.
 - Theme watcher startup and wallpaper cycling now avoid first-run double-cycle races.
+- Target App path policy, output writes, fallbacks, failure reporting, and Sync Run orchestration now use shared modules.
 
 ### Security
 - Raised the minimum Pillow version to `12.2.0` to exclude vulnerable releases.
-- Path overrides in setup/install flows are validated and constrained to the current user home.
 - LaunchAgent plist rendering now XML-escapes substituted install paths.
