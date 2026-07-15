@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-15
+
+### Highlights
+- Added opt-in VS Code token-color syncing without replacing existing TextMate rules.
+- Wallpaper colors now reapply after display changes and resync when configuration changes.
+- Require Pillow 12.3.0 and escape LaunchAgent install paths before plist rendering.
+
 ### Added
 - GitHub Pages project site.
 - Opt-in VS Code token-color syncing that preserves existing user TextMate rules.
